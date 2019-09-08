@@ -1,2 +1,4 @@
 rootProject.name = 'slack-bot'
+include 'web'
+include 'core'
 

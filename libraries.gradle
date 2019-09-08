@@ -1,0 +1,16 @@
+ext {
+    springBootVersion   = '2.1.8.RELEASE'
+    jodaTimeVersion     = '2.10.3'
+
+    withoutTomcat = { exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat' }
+    withoutWebSocket = { exclude group: 'org.eclipse.jetty.websocket' }
+
+
+    libraries = [
+            springBootStarter                 : "org.springframework.boot:spring-boot-starter:${springBootVersion}",
+            springBootStarterWeb            : "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
+            springBootStarterTest           : "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
+            springBootStarterJetty          : "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
+            jodaTime                        : "joda-time:joda-time':${jodaTimeVersion}"
+    ]
+}
