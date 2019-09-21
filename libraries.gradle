@@ -7,10 +7,10 @@ ext {
 
 
     libraries = [
-            springBootStarter                 : "org.springframework.boot:spring-boot-starter:${springBootVersion}",
+            springBootStarter               : "org.springframework.boot:spring-boot-starter:${springBootVersion}",
             springBootStarterWeb            : "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
             springBootStarterTest           : "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
             springBootStarterJetty          : "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
-            jodaTime                        : "joda-time:joda-time':${jodaTimeVersion}"
+            springBootDataJpa               : "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
     ]
 }
