@@ -6,14 +6,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit4.SpringRunner;
-import rs.kunpero.vacation.config.CoreTestConfig;
 import rs.kunpero.vacation.config.MessageSourceConfig;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
-import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
 
 import java.time.LocalDate;
