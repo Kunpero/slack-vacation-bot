@@ -3,6 +3,7 @@ package rs.kunpero.vacation.service;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,6 +20,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -43,8 +46,10 @@ public class VacationServiceTest {
                 .setDateTo(to)
                 .setSubstitutionIdList(substitutionUserIds);
         when(vacationInfoRepository.findByUserId(anyString())).thenReturn(Collections.emptyList());
-
+        ArgumentCaptor<VacationInfo> vacationInfoArgumentCaptor = ArgumentCaptor.forClass(VacationInfo.class);
         var response = vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor.capture());
+        Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor.getValue().getSubstitutionUserIds());
         Assert.assertEquals(0, response.getErrorCode());
         Assert.assertEquals("add.vacation.success.message", response.getErrorDescription());
     }
