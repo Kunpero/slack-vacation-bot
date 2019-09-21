@@ -1,18 +1,8 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
 plugins {
     id 'java'
     id 'idea'
     id "org.springframework.boot" version "2.1.8.RELEASE"
-    id "io.spring.dependency-management" version "1.0.8.RELEASE"
-
+//    id "io.spring.dependency-management" version "1.0.8.RELEASE"
 }
 
 sourceCompatibility = 1.11
@@ -23,6 +13,7 @@ dependencies {
     compile libraries.springBootStarterJetty, withoutWebSocket
     compile libraries.jodaTime
 
-    compileOnly 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
     testCompile libraries.springBootStarterTest
 }
