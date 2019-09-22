@@ -1,3 +1,7 @@
+plugins {
+        id 'org.jetbrains.kotlin.jvm' version '1.3.50' apply(false)
+}
+
 group 'rs.kunpero'
 version '1.0-SNAPSHOT'
 
@@ -9,5 +13,3 @@ allprojects {
 }
 
 apply from: "./libraries.gradle"
-
-

@@ -2,16 +2,27 @@ plugins {
     id 'java'
     id 'idea'
     id "org.springframework.boot" version "2.1.8.RELEASE"
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 sourceCompatibility = 1.11
 
 dependencies {
-    compile project(":core")
-    compile libraries.springBootStarterWeb, withoutTomcat
-    compile libraries.springBootStarterJetty, withoutWebSocket
+    implementation project(":core")
+    implementation libraries.springBootStarterWeb, withoutTomcat
+    implementation libraries.springBootStarterJetty, withoutWebSocket
 
     compileOnly 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     testCompile libraries.springBootStarterTest
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+repositories {
+    mavenCentral()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }

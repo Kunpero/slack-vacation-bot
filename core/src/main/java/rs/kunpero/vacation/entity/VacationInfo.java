@@ -2,7 +2,6 @@ package rs.kunpero.vacation.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
@@ -16,7 +15,6 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 public class VacationInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VACATION_INFO_SEQUENCE")

@@ -2,21 +2,20 @@ plugins {
     id 'java'
     id 'idea'
     id "io.spring.dependency-management" version "1.0.8.RELEASE"
-    id 'org.jetbrains.kotlin.jvm' version '1.3.50'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 sourceCompatibility = 1.11
 
 dependencies {
 
-    compile libraries.springBootStarter
-    compile libraries.springBootDataJpa
-    compileOnly 'org.projectlombok:lombok:1.18.10'
+    implementation libraries.springBootStarter
+    implementation libraries.springBootDataJpa
+    implementation 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     testCompile libraries.springBootStarterTest
     testRuntime('com.h2database:h2')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-
 }
 
 dependencyManagement {
