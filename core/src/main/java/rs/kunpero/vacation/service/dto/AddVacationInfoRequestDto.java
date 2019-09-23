@@ -16,9 +16,4 @@ public class AddVacationInfoRequestDto {
     private LocalDate dateTo;
 
     private List<String> substitutionIdList;
-
-//    public AddVacationInfoRequestDto setSubstitutionIdList(List<String> substitutionIdList) {
-//        this.substitutionIdList = Collections.unmodifiableList(substitutionIdList);
-//        return this;
-//    }
 }

@@ -2,6 +2,7 @@ package rs.kunpero.vacation.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,9 +12,12 @@ import rs.kunpero.vacation.service.VacationService;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import javax.validation.Valid;
 
-@RestController
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static rs.kunpero.vacation.util.converter.VacationConverterUtils.convert;
+
+@RestController("/vacation")
 @Slf4j
 public class VacationController implements VacationControllerMeta {
 
@@ -21,20 +25,16 @@ public class VacationController implements VacationControllerMeta {
     private VacationService vacationService;
 
     @RequestMapping(name = "/addVacation.do", method = RequestMethod.POST, produces = APPLICATION_JSON_UTF8_VALUE)
-    public AddVacationInfoResponse addVacation(AddVacationInfoRequest request) {
+    public AddVacationInfoResponse addVacation(@Valid @RequestBody AddVacationInfoRequest request) {
         log.info("Incoming addVacation request: [{}]", request);
 
-        AddVacationInfoRequestDto requestDto = new AddVacationInfoRequestDto()
-                .setUserId(request.getUserId())
-                .setDateFrom(request.getDateFrom())
-                .setDateTo(request.getDateTo())
-                .setSubstitutionIdList(null);
+        AddVacationInfoRequestDto requestDto = convert(request);
 
         AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
         AddVacationInfoResponse response = new AddVacationInfoResponse()
                 .setErrorCode(responseDto.getErrorCode())
                 .setErrorDescription(responseDto.getErrorDescription());
-        log.info("Incoming addVacation request: [{}]", response);
+        log.info("Outcome addVacation response: [{}]", response);
         return response;
     }
 }

@@ -1,8 +1,10 @@
 package rs.kunpero.vacation.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -13,6 +15,7 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
+@Accessors(chain = true)
 public class AddVacationInfoRequest {
     @NotBlank
     private String userId;
@@ -23,7 +26,8 @@ public class AddVacationInfoRequest {
     @NotNull
     private LocalDate dateTo;
 
-    private List<String> substitution;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<String> substitution = new ArrayList<>();
 
     public String getUserId() {
         return userId;
