@@ -19,7 +19,7 @@ import static rs.kunpero.vacation.util.converter.VacationConverterUtils.convert;
 
 @RestController("/vacation")
 @Slf4j
-public class VacationController implements VacationControllerMeta {
+public class VacationController {
 
     @Autowired
     private VacationService vacationService;
