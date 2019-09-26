@@ -12,6 +12,7 @@ dependencies {
     implementation libraries.springBootStarter
     implementation libraries.springBootDataJpa
     implementation 'org.projectlombok:lombok:1.18.10'
+    implementation libraries.oracle
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     testCompile libraries.springBootStarterTest
     testRuntime('com.h2database:h2')
