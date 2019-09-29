@@ -12,6 +12,7 @@ ext {
             springBootStarterTest           : "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
             springBootStarterJetty          : "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
             springBootDataJpa               : "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
+            springBootSecurity              : "org.springframework.boot:spring-boot-starter-security:${springBootVersion}",
             oracle                          : "com.oracle:ojdbc7:12.1.0.2",
     ]
 }

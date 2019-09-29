@@ -11,6 +11,9 @@ dependencies {
     implementation project(":core")
     implementation libraries.springBootStarterWeb, withoutTomcat
     implementation libraries.springBootStarterJetty, withoutWebSocket
+    implementation libraries.springBootSecurity
+//    compile group: 'com.github.seratch', name: 'jslack', version: '2.2.0'
+    
 
     compileOnly 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
