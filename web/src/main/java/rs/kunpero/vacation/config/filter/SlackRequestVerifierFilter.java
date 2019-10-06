@@ -4,8 +4,6 @@ import com.github.seratch.jslack.app_backend.SlackSignature;
 import com.github.seratch.jslack.app_backend.events.servlet.SlackSignatureVerifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -15,12 +13,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
-@Component
-@Order(HIGHEST_PRECEDENCE)
 @Slf4j
 public class SlackRequestVerifierFilter extends GenericFilterBean {
     @Autowired
@@ -29,8 +25,8 @@ public class SlackRequestVerifierFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         AuthenticationRequestWrapper wrappedRequest = new AuthenticationRequestWrapper((HttpServletRequest) servletRequest);
-        String body = new String(wrappedRequest.getRequestBody());
-        boolean isValid = slackSignatureVerifier.isValid((HttpServletRequest) servletRequest, body);
+        String body = wrappedRequest.getReader().lines().collect(Collectors.joining());
+        boolean isValid = slackSignatureVerifier.isValid(wrappedRequest, body);
         if (!isValid) { // invalid signature
             String signature = ((HttpServletRequest) servletRequest).getHeader(SlackSignature.HeaderNames.X_SLACK_SIGNATURE);
             log.debug("An invalid X-Slack-Signature detected - {}", signature);
