@@ -23,11 +23,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public SlackRequestVerifierFilter slackRequestVerifierFilter() {
         return new SlackRequestVerifierFilter();
     }
-    @Bean
-    public FilterRegistrationBean slackRequestVerifierFilterRegistration() {
 
+    @Bean
+    public FilterRegistrationBean slackRequestVerifierFilterRegistration(SlackRequestVerifierFilter filter) {
         FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(slackRequestVerifierFilter());
+        registration.setFilter(filter);
         registration.addUrlPatterns("/vacation/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
