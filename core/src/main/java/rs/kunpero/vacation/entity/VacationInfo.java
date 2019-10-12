@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class VacationInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VACATION_INFO_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VACATION_INFO")
     private long id;
 
     @Column(name = "USER_ID", length = 21, nullable = false)

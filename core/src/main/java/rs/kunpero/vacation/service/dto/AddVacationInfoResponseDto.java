@@ -10,4 +10,8 @@ import lombok.experimental.Accessors;
 public class AddVacationInfoResponseDto {
     private int errorCode;
     private String errorDescription;
+
+    public boolean isSuccesful() {
+        return errorCode == 0;
+    }
 }

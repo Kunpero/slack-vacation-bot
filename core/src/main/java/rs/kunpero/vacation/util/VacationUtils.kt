@@ -10,7 +10,10 @@ class VacationUtils {
         }
 
         @JvmStatic
-        fun convertListToString(list: List<String>): String {
+        fun convertListToString(list: List<String>?): String {
+            if (list.isNullOrEmpty()) {
+                return String()
+            }
             return list.distinct().joinToString(",")
         }
     }
