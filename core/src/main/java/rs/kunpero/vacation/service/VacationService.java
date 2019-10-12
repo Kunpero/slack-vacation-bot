@@ -19,10 +19,14 @@ import static rs.kunpero.vacation.util.VacationUtils.isWithinRange;
 @Slf4j
 public class VacationService {
 
+    private final VacationInfoRepository vacationInfoRepository;
+    private final MessageSourceHelper messageSourceHelper;
+
     @Autowired
-    private VacationInfoRepository vacationInfoRepository;
-    @Autowired
-    private MessageSourceHelper messageSourceHelper;
+    public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper) {
+        this.vacationInfoRepository = vacationInfoRepository;
+        this.messageSourceHelper = messageSourceHelper;
+    }
 
     public AddVacationInfoResponseDto addVacationInfo(AddVacationInfoRequestDto request) {
         var dateFrom = request.getDateFrom();
