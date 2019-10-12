@@ -11,7 +11,7 @@ class VacationUtils {
 
         @JvmStatic
         fun convertListToString(list: List<String>): String {
-            return list.joinToString(",")
+            return list.distinct().joinToString(",")
         }
     }
 }
