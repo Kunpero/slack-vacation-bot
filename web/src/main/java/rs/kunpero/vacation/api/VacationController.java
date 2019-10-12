@@ -116,14 +116,8 @@ public class VacationController {
                 .text(MarkdownTextObject.builder()
                         .text(String.format("`%s`", errorDescription))
                         .build()).build());
-        View viewWithError = View.builder()
-                .type("modal")
-                .callbackId("callback_id")
-                .title(ViewTitle.builder().type("plain_text").text("New vacation info").build())
-                .submit(ViewSubmit.builder().type("plain_text").text("Submit").build())
-                .notifyOnClose(true)
-                .blocks(blocks)
-                .build();
+        View viewWithError = ADD_VACATION_INFO_VIEW;
+        viewWithError.setBlocks(blocks);
         ViewSubmissionResponse submissionResponse = ViewSubmissionResponse.builder()
                 .responseAction("update")
                 .view(viewWithError)
