@@ -2,6 +2,7 @@ package rs.kunpero.vacation.util;
 
 import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.DividerBlock;
+import com.github.seratch.jslack.api.model.block.InputBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
 import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
@@ -19,7 +20,9 @@ import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
+import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 
 public class ViewHelper {
     public static final SlashCommandResponse START_MENU = SlashCommandResponse.builder()
@@ -52,36 +55,47 @@ public class ViewHelper {
             .submit(ViewSubmit.builder().type("plain_text").text("Submit").build())
             .notifyOnClose(true)
             .blocks(List.of(
-                    SectionBlock.builder()
-                            .text(MarkdownTextObject.builder()
-                                    .text("*Fill down your new vacation info:*").build()).build(),
-                    SectionBlock.builder()
-                            .text(MarkdownTextObject.builder()
-                                    .text("Vacation start").build())
-                            .accessory(DatePickerElement.builder()
+                    InputBlock.builder()
+                            .blockId(DATE_FROM.name())
+                            .optional(false)
+                            .label(PlainTextObject.builder()
+                                    .text("Date from")
+                                    .emoji(true)
+                                    .build())
+                            .element(DatePickerElement.builder()
                                     .actionId(SET_FROM.name())
                                     .placeholder(PlainTextObject.builder()
-                                            .emoji(true)
-                                            .text("Select a date").build()).build())
+                                            .text("Select a date")
+                                            .build())
+                                    .build())
                             .build(),
-                    SectionBlock.builder()
+                    InputBlock.builder()
                             .blockId(DATE_TO.name())
-                            .text(MarkdownTextObject.builder()
-                                    .text("Vacation end").build())
-                            .accessory(DatePickerElement.builder()
+                            .optional(false)
+                            .label(PlainTextObject.builder()
+                                    .text("Date to")
+                                    .emoji(true)
+                                    .build())
+                            .element(DatePickerElement.builder()
                                     .actionId(SET_TO.name())
                                     .placeholder(PlainTextObject.builder()
-                                            .emoji(true)
-                                            .text("Select a date").build()).build())
+                                            .text("Select a date")
+                                            .build())
+                                    .build())
                             .build(),
-                    SectionBlock.builder()
-                            .text(MarkdownTextObject.builder()
-                                    .text("Substitution").build())
-                            .accessory(MultiUsersSelectElement.builder()
+                    InputBlock.builder()
+                            .blockId(SUBSTITUTION.name())
+                            .optional(true)
+                            .label(PlainTextObject.builder()
+                                    .text("Substitution")
+                                    .emoji(true)
+                                    .build())
+                            .element(MultiUsersSelectElement.builder()
                                     .actionId(SET_SUBSTITUTION.name())
                                     .placeholder(PlainTextObject.builder()
-                                            .emoji(true)
-                                            .text("Select users").build()).build())
+                                            .text("Choose your substitution")
+                                            .build())
+                                    .build())
                             .build()))
             .build();
 }
