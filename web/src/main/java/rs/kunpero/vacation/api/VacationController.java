@@ -2,15 +2,19 @@ package rs.kunpero.vacation.api;
 
 import com.github.seratch.jslack.Slack;
 import com.github.seratch.jslack.api.methods.SlackApiException;
+import com.github.seratch.jslack.api.model.block.ActionsBlock;
+import com.github.seratch.jslack.api.model.block.DividerBlock;
 import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
+import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
+import com.github.seratch.jslack.api.model.block.element.ButtonElement;
 import com.github.seratch.jslack.api.model.view.View;
 import com.github.seratch.jslack.api.model.view.ViewState;
-import com.github.seratch.jslack.api.model.view.ViewSubmit;
-import com.github.seratch.jslack.api.model.view.ViewTitle;
+import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.BlockActionPayload;
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.PayloadTypeDetector;
+import com.github.seratch.jslack.app_backend.interactive_messages.response.ActionResponse;
 import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
 import com.github.seratch.jslack.app_backend.views.payload.ViewSubmissionPayload;
 import com.github.seratch.jslack.app_backend.views.response.ViewSubmissionResponse;
@@ -24,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 import rs.kunpero.vacation.service.VacationService;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
 import rs.kunpero.vacation.util.ActionId;
 import rs.kunpero.vacation.util.BlockId;
 
@@ -40,15 +46,18 @@ import java.util.stream.Collectors;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
+import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.ERROR;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 import static rs.kunpero.vacation.util.ViewHelper.ADD_VACATION_INFO_VIEW;
 import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
+import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 
 @RestController
 @Slf4j
@@ -56,12 +65,18 @@ import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
 public class VacationController {
     private static final PayloadTypeDetector TYPE_DETECTOR = new PayloadTypeDetector();
 
+    private final VacationService vacationService;
+    private final Gson gson;
+    private final Slack slack;
+    private final ActionResponseSender actionResponseSender;
+
     @Autowired
-    private VacationService vacationService;
-    @Autowired
-    private Gson gson;
-    @Autowired
-    private Slack slack;
+    public VacationController(VacationService vacationService, Gson gson, Slack slack, ActionResponseSender actionResponseSender) {
+        this.vacationService = vacationService;
+        this.gson = gson;
+        this.slack = slack;
+        this.actionResponseSender = actionResponseSender;
+    }
 
     @Value("${slack.access.token}")
     private String accessToken;
@@ -89,8 +104,33 @@ public class VacationController {
                         .triggerId(payload.getTriggerId()));
             }
 
+            if (actionId == SHOW_VACATION) {
+                ShowVacationInfoRequestDto requestDto = new ShowVacationInfoRequestDto()
+                        .setUserId(payload.getUser().getId())
+                        .setTeamId(payload.getUser().getTeamId());
+                ShowVacationInfoResponseDto responseDto = vacationService.showVacationInfo(requestDto);
+                List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
+
+                ActionResponse actionResponse = ActionResponse.builder()
+                        .replaceOriginal(true)
+                        .responseType("ephemeral")
+                        .blocks(blocks)
+                        .build();
+
+                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
+            }
+
+            if (actionId == CLOSE_DIALOG) {
+                ActionResponse actionResponse = ActionResponse.builder()
+                        .deleteOriginal(true)
+                        .responseType("ephemeral")
+                        .build();
+
+                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
+            }
             response.setStatus(HttpServletResponse.SC_OK);
         } else if ("view_submission".equals(type)) {
+            // TODO: check hash
             ViewSubmissionPayload payload = gson.fromJson(body, ViewSubmissionPayload.class);
             Map<String, Map<String, ViewState.Value>> valuesMap = payload.getView().getState().getValues();
             AddVacationInfoRequestDto requestDto = new AddVacationInfoRequestDto()
@@ -100,7 +140,7 @@ public class VacationController {
                     .setDateTo(LocalDate.parse(valuesMap.get(DATE_TO.name()).get(SET_TO.name()).getSelectedDate()))
                     .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers());
             AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
-            if (!responseDto.isSuccesful()) {
+            if (!responseDto.isSuccessful()) {
                 buildErrorResponse(payload, responseDto.getErrorDescription(), response);
             }
         }

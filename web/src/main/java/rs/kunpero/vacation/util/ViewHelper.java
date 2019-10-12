@@ -3,6 +3,7 @@ package rs.kunpero.vacation.util;
 import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.DividerBlock;
 import com.github.seratch.jslack.api.model.block.InputBlock;
+import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
 import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
@@ -15,11 +16,14 @@ import com.github.seratch.jslack.api.model.view.ViewTitle;
 import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
+import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
@@ -44,7 +48,13 @@ public class ViewHelper {
                                                     .emoji(true)
                                                     .build())
                                             .actionId(ADD_VACATION.name())
-                                            .build()))
+                                            .build(),
+                                    ButtonElement.builder()
+                                            .text(PlainTextObject.builder()
+                                                    .text("Show/Delete Vacation Info")
+                                                    .emoji(true)
+                                                    .build())
+                                            .actionId(SHOW_VACATION.name()).build()))
                             .build()))
             .build();
 
@@ -98,4 +108,47 @@ public class ViewHelper {
                                     .build())
                             .build()))
             .build();
+
+    public static List<LayoutBlock> buildShowVacationBlocks(List<String> vacationInfoList) {
+        List<LayoutBlock> blocks = vacationInfoList.stream()
+                .map(v -> SectionBlock.builder()
+                        .text(MarkdownTextObject.builder()
+                                .text(v)
+                                .build())
+                        .accessory(ButtonElement.builder()
+                                .style("danger")
+                                .actionId("DELETE")
+                                .text(PlainTextObject.builder()
+                                        .text("Delete")
+                                        .build())
+                                .build())
+                        .build())
+                .collect(Collectors.toList());
+        blocks.add(0, DividerBlock.builder().build());
+        blocks.add(0, SectionBlock.builder()
+                .text(MarkdownTextObject.builder()
+                        .text(":camping: Your current vacation info:")
+                        .build())
+                .build());
+        blocks.add(DividerBlock.builder().build());
+        blocks.add(ActionsBlock.builder()
+                .blockId(ADD_VACATION.name())
+                .elements(List.of(
+                        ButtonElement.builder()
+                                .style("primary")
+                                .text(PlainTextObject.builder()
+                                        .text("Add Vacation")
+                                        .emoji(true)
+                                        .build())
+                                .actionId(ADD_VACATION.name())
+                                .build(),
+                        ButtonElement.builder()
+                                .text(PlainTextObject.builder()
+                                        .text("Close")
+                                        .emoji(true)
+                                        .build())
+                                .actionId(CLOSE_DIALOG.name()).build()))
+                .build());
+        return blocks;
+    }
 }

@@ -3,6 +3,7 @@ package rs.kunpero.vacation.config;
 import com.github.seratch.jslack.Slack;
 import com.github.seratch.jslack.app_backend.SlackSignature;
 import com.github.seratch.jslack.app_backend.events.servlet.SlackSignatureVerifier;
+import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
 import com.github.seratch.jslack.app_backend.interactive_messages.ResponseSender;
 import com.github.seratch.jslack.common.json.GsonFactory;
 import com.google.gson.Gson;
@@ -47,5 +48,10 @@ public class SlackConfig {
     @Bean
     public SlackSignatureVerifier slackSignatureVerifier(SlackSignature.Generator slackSignatureGenerator) {
         return new SlackSignatureVerifier(slackSignatureGenerator);
+    }
+
+    @Bean
+    public ActionResponseSender actionResponseSender(Slack slack) {
+        return new ActionResponseSender(slack);
     }
 }

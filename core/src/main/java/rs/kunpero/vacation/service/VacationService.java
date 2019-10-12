@@ -7,18 +7,24 @@ import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static rs.kunpero.vacation.util.VacationUtils.convertListToString;
 import static rs.kunpero.vacation.util.VacationUtils.isWithinRange;
 
 @Service
 @Slf4j
 public class VacationService {
-
     private final VacationInfoRepository vacationInfoRepository;
     private final MessageSourceHelper messageSourceHelper;
 
@@ -44,6 +50,19 @@ public class VacationService {
 
         log.info("VacationInfo was saved successfully");
         return buildResponse("add.vacation.success");
+    }
+
+    public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
+        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+        return new ShowVacationInfoResponseDto()
+                .setVacationInfoList(vacationInfoList.stream()
+                        .sorted(Comparator.comparing(VacationInfo::getDateFrom))
+                        .map(v -> String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
+                                v.getSubstitutionUserIds() != null ? Arrays.stream(v.getSubstitutionUserIds().split(","))
+                                        .map(u -> String.format("<@%s>", u))
+                                        .collect(joining(", "))
+                                : ""))
+                        .collect(toList()));
     }
 
     private Optional<String> validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {
