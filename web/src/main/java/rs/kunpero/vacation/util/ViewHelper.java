@@ -19,6 +19,7 @@ import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 
 public class ViewHelper {
     public static final SlashCommandResponse START_MENU = SlashCommandResponse.builder()
@@ -64,6 +65,7 @@ public class ViewHelper {
                                             .text("Select a date").build()).build())
                             .build(),
                     SectionBlock.builder()
+                            .blockId(DATE_TO.name())
                             .text(MarkdownTextObject.builder()
                                     .text("Vacation end").build())
                             .accessory(DatePickerElement.builder()

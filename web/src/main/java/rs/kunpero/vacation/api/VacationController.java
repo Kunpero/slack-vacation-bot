@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import rs.kunpero.vacation.api.dto.FormActivity;
 import rs.kunpero.vacation.service.VacationService;
+import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
 import rs.kunpero.vacation.util.ActionId;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,15 +80,30 @@ public class VacationController {
                         .triggerId(payload.getTriggerId()));
             }
             if (actionId == SET_FROM) {
-                fillActivityCache(payload.getView().getId(), actions.get(0).getSelectedDate(),
+                String viewId = payload.getView().getId();
+                FormActivity formActivity = activityCache.getOrDefault(viewId, new FormActivity());
+
+                if (validateDate(LocalDate.parse(actions.get(0).getSelectedDate()), formActivity.getDateTo())) {
+
+                }
+
+                fillActivityCache(viewId, actions.get(0).getSelectedDate(),
                         (form, value) -> form.setDateFrom(LocalDate.parse(value)));
             }
             if (actionId == SET_TO) {
-                fillActivityCache(payload.getView().getId(), actions.get(0).getSelectedDate(),
+                String viewId = payload.getView().getId();
+                FormActivity formActivity = activityCache.getOrDefault(viewId, new FormActivity());
+
+                if (validateDate(formActivity.getDateFrom(), LocalDate.parse(actions.get(0).getSelectedDate()))) {
+
+                }
+
+                fillActivityCache(viewId, actions.get(0).getSelectedDate(),
                         (form, value) -> form.setDateTo(LocalDate.parse(value)));
             }
             if (actionId == SET_SUBSTITUTION) {
-                fillActivityCache(payload.getView().getId(), actions.get(0).getSelectedUsers(),
+                String viewId = payload.getView().getId();
+                fillActivityCache(viewId, actions.get(0).getSelectedUsers(),
                         FormActivity::setSubstitution);
             }
         }
@@ -95,8 +112,19 @@ public class VacationController {
             ViewSubmissionPayload payload = gson.fromJson(body, ViewSubmissionPayload.class);
             log.info(activityCache.toString());
             /** maybe need to close if error occur. conduct research*/
-            // TODO: vacationService.save
-            activityCache.remove(payload.getView().getId());
+            FormActivity formActivity = activityCache.get(payload.getView().getId());
+            AddVacationInfoRequestDto requestDto = new AddVacationInfoRequestDto()
+                    .setUserId(payload.getUser().getId())
+                    .setDateFrom(formActivity.getDateFrom())
+                    .setDateTo(formActivity.getDateTo())
+                    .setSubstitutionIdList(formActivity.getSubstitution());
+
+            AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
+            if (responseDto.isSuccesful()) {
+                activityCache.remove(payload.getView().getId());
+            }
+
+            // TODO: return error to slack
         }
 
         if ("view_closed".equals(type)) {
@@ -105,6 +133,13 @@ public class VacationController {
         }
 
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private boolean validateDate(LocalDate dateFrom, LocalDate dateTo) {
+        if (dateFrom == null || dateTo == null) {
+            return false;
+        }
+        return dateFrom.isBefore(dateTo);
     }
 
     private <T> void fillActivityCache(String viewId, T value, BiConsumer<FormActivity, T> fieldConsumer) {
