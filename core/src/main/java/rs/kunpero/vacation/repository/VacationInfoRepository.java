@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface VacationInfoRepository extends CrudRepository<VacationInfo, Long> {
-    List<VacationInfo> findByUserId(String userId);
+    List<VacationInfo> findByUserIdAndTeamId(String userId, String teamId);
 }

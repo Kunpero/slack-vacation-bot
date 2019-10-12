@@ -36,16 +36,18 @@ public class VacationServiceTest {
     @Test
     public void successfulAddOperationTest() {
         var userId = "USER0";
+        var teamId = "TEAM0";
         var from = LocalDate.of(2018, Month.JUNE, 17);
         var to = from.plusDays(1);
         var substitutionUserIds = List.of("USER1", "USER2");
 
         var request = new AddVacationInfoRequestDto()
                 .setUserId(userId)
+                .setTeamId(teamId)
                 .setDateFrom(from)
                 .setDateTo(to)
                 .setSubstitutionIdList(substitutionUserIds);
-        when(vacationInfoRepository.findByUserId(anyString())).thenReturn(Collections.emptyList());
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
         ArgumentCaptor<VacationInfo> vacationInfoArgumentCaptor = ArgumentCaptor.forClass(VacationInfo.class);
         var response = vacationService.addVacationInfo(request);
         verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor.capture());
@@ -57,14 +59,16 @@ public class VacationServiceTest {
     @Test
     public void vacationPeriodInterfereErrorTest() {
         var userId = "USER0";
+        var teamId = "TEAM0";
         var from = LocalDate.of(2018, Month.JUNE, 17);
         var to = from.plusDays(2);
         var substitutionUserIds = List.of("USER1", "USER2");
-        var interferedVacation = new VacationInfo(0, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2");
-        when(vacationInfoRepository.findByUserId(anyString())).thenReturn(List.of(interferedVacation));
+        var interferedVacation = new VacationInfo(0, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2");
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
                 .setUserId(userId)
+                .setTeamId(teamId)
                 .setDateFrom(from)
                 .setDateTo(to)
                 .setSubstitutionIdList(substitutionUserIds);

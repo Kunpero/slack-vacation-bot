@@ -19,17 +19,19 @@ public class VacationInfoRepositoryTest {
     private VacationInfoRepository vacationInfoRepository;
 
     @Test
-    public void findByUserIdTest() {
+    public void findByUserIdTestAndTeamId() {
         final String userId = "USER0";
+        final String teamId = "TEAM0";
         final String substitution = "USER1,USER2";
 
-        List<VacationInfo> userVacations = vacationInfoRepository.findByUserId(userId);
+        List<VacationInfo> userVacations = vacationInfoRepository.findByUserIdAndTeamId(userId, teamId);
         Assert.assertEquals(1, userVacations.size());
 
 
         VacationInfo actualVacation = userVacations.get(0);
         VacationInfo expectedVacation = new VacationInfo(0,
                 userId,
+                teamId,
                 LocalDate.of(2018, Month.JUNE, 16),
                 LocalDate.of(2018, Month.JUNE, 18),
                 substitution);
@@ -39,11 +41,12 @@ public class VacationInfoRepositoryTest {
     @Test
     public void saveTest() {
         final String userId = "USER1";
+        final String teamId = "TEAM0";
         final String substitution = "USER0,USER2";
         final LocalDate from = LocalDate.of(2018, Month.JUNE, 19);
         final LocalDate to = LocalDate.of(2018, Month.JUNE, 20);
 
-        VacationInfo savedEntity = vacationInfoRepository.save(new VacationInfo(userId, from, to, substitution));
+        VacationInfo savedEntity = vacationInfoRepository.save(new VacationInfo(userId, teamId, from, to, substitution));
         Assert.assertNotNull(savedEntity);
     }
 

@@ -8,7 +8,6 @@ import rs.kunpero.vacation.repository.VacationInfoRepository;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
-import rs.kunpero.vacation.util.VacationUtils;
 
 import java.time.LocalDate;
 
@@ -26,21 +25,24 @@ public class VacationService {
 
     public AddVacationInfoResponseDto addVacationInfo(AddVacationInfoRequestDto request) {
 
-        boolean isInterfered = validatePeriod(request.getUserId(), request.getDateFrom(), request.getDateTo());
+        var isInterfered = validatePeriod(request.getUserId(), request.getTeamId(),
+                request.getDateFrom(), request.getDateTo());
         if (isInterfered) {
             log.warn("Already has vacation at this period: [{} - {}]", request.getDateFrom(), request.getDateTo());
             return buildResponse("vacation.period.interfere.error");
         }
         String substitutionUserIds = convertListToString(request.getSubstitutionIdList());
-        VacationInfo vacationInfo = new VacationInfo(request.getUserId(), request.getDateFrom(), request.getDateTo(), substitutionUserIds);
+        VacationInfo vacationInfo = new VacationInfo(request.getUserId(), request.getTeamId(),
+                request.getDateFrom(), request.getDateTo(), substitutionUserIds);
         vacationInfoRepository.save(vacationInfo);
 
         log.info("VacationInfo was saved successfully");
         return buildResponse("add.vacation.success");
     }
 
-    private boolean validatePeriod(String userId, LocalDate from, LocalDate to) {
-        var userVacations = vacationInfoRepository.findByUserId(userId);
+    private boolean validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {
+
+        var userVacations = vacationInfoRepository.findByUserIdAndTeamId(userId, teamId);
         return userVacations.stream()
                 .anyMatch(v -> isWithinRange(v.getDateFrom(), from, to) ||
                         isWithinRange(v.getDateTo(), from, to));

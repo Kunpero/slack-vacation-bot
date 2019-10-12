@@ -23,6 +23,9 @@ public class VacationInfo {
     @Column(name = "USER_ID", length = 21, nullable = false)
     private String userId;
 
+    @Column(name = "TEAM_ID", length = 21, nullable = false)
+    private String teamId;
+
     @Column(name = "DATE_FROM", nullable = false)
     private LocalDate dateFrom;
 
@@ -32,8 +35,9 @@ public class VacationInfo {
     @Column(name = "SUBSTITUTION_USER_IDS")
     private String substitutionUserIds;
 
-    public VacationInfo(String userId, LocalDate dateFrom, LocalDate dateTo, String substitutionUserIds) {
+    public VacationInfo(String userId, String teamId, LocalDate dateFrom, LocalDate dateTo, String substitutionUserIds) {
         this.userId = userId;
+        this.teamId = teamId;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
         this.substitutionUserIds = substitutionUserIds;

@@ -11,6 +11,8 @@ import java.util.List;
 public class AddVacationInfoRequestDto {
     private String userId;
 
+    private String teamId;
+
     private LocalDate dateFrom;
 
     private LocalDate dateTo;
