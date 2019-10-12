@@ -25,23 +25,30 @@ public class VacationService {
 
     public AddVacationInfoResponseDto addVacationInfo(AddVacationInfoRequestDto request) {
 
-        var isInterfered = validatePeriod(request.getUserId(), request.getTeamId(),
-                request.getDateFrom(), request.getDateTo());
+        var dateFrom = request.getDateFrom();
+        var dateTo = request.getDateTo();
+
+        if (dateFrom.isAfter(dateTo)) {
+            log.warn("dateFrom [{}] must be before dateTo [{}]", dateFrom, dateTo);
+            return buildResponse("vacation.period.wrong.sequence");
+        }
+        var isInterfered = checkVacationsForUser(request.getUserId(), request.getTeamId(),
+                dateFrom, dateTo);
         if (isInterfered) {
-            log.warn("Already has vacation at this period: [{} - {}]", request.getDateFrom(), request.getDateTo());
+            log.warn("Already has vacation at this period: [{} - {}]", dateFrom, dateTo);
             return buildResponse("vacation.period.interfere.error");
         }
+
         String substitutionUserIds = convertListToString(request.getSubstitutionIdList());
         VacationInfo vacationInfo = new VacationInfo(request.getUserId(), request.getTeamId(),
-                request.getDateFrom(), request.getDateTo(), substitutionUserIds);
+                dateFrom, dateTo, substitutionUserIds);
         vacationInfoRepository.save(vacationInfo);
 
         log.info("VacationInfo was saved successfully");
         return buildResponse("add.vacation.success");
     }
 
-    private boolean validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {
-
+    private boolean checkVacationsForUser(String userId, String teamId, LocalDate from, LocalDate to) {
         var userVacations = vacationInfoRepository.findByUserIdAndTeamId(userId, teamId);
         return userVacations.stream()
                 .anyMatch(v -> isWithinRange(v.getDateFrom(), from, to) ||

@@ -57,6 +57,24 @@ public class VacationServiceTest {
     }
 
     @Test
+    public void vacationPeriodDateFromIsAfterDateToErrorTest() {
+        var userId = "USER0";
+        var teamId = "TEAM0";
+        var from = LocalDate.of(2018, Month.JUNE, 17);
+        var to = from.minusDays(2);
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to)
+                .setSubstitutionIdList(null);
+        var response = vacationService.addVacationInfo(request);
+        Assert.assertEquals(3, response.getErrorCode());
+        Assert.assertEquals("vacation.period.wrong.sequence.message", response.getErrorDescription());
+
+    }
+
+    @Test
     public void vacationPeriodInterfereErrorTest() {
         var userId = "USER0";
         var teamId = "TEAM0";
