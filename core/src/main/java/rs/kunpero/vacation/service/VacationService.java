@@ -63,7 +63,7 @@ public class VacationService {
 
     public DeleteVacationInfoResponseDto deleteVacationInfo(DeleteVacationInfoRequestDto request) {
         vacationInfoRepository.deleteById(request.getVacationInfoId());
-        log.info("VacationInfo with id [{}] was successfully deleted");
+        log.info("VacationInfo with id [{}] was successfully deleted", request.getVacationInfoId());
         List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
         return new DeleteVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));

@@ -2,9 +2,14 @@ package rs.kunpero.vacation.api;
 
 import com.github.seratch.jslack.Slack;
 import com.github.seratch.jslack.api.methods.SlackApiException;
+import com.github.seratch.jslack.api.methods.request.chat.ChatPostEphemeralRequest;
+import com.github.seratch.jslack.api.methods.response.chat.ChatPostEphemeralResponse;
+import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
+import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
+import com.github.seratch.jslack.api.model.block.element.ButtonElement;
 import com.github.seratch.jslack.api.model.view.View;
 import com.github.seratch.jslack.api.model.view.ViewState;
 import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
@@ -54,8 +59,8 @@ import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.ERROR;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
-import static rs.kunpero.vacation.util.ViewHelper.ADD_VACATION_INFO_VIEW;
 import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
+import static rs.kunpero.vacation.util.ViewHelper.buildAddVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 
 @RestController
@@ -99,8 +104,16 @@ public class VacationController {
 
             if (actionId == ADD_VACATION) {
                 slack.methods(accessToken).viewsOpen(req -> req
-                        .view(ADD_VACATION_INFO_VIEW)
+                        .view(buildAddVacationInfoView(payload.getChannel().getId()))
                         .triggerId(payload.getTriggerId()));
+
+                ActionResponse actionResponse = ActionResponse.builder()
+                        .deleteOriginal(true)
+                        .text(" ")
+                        .responseType("ephemeral")
+                        .build();
+
+                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
             }
 
             if (actionId == SHOW_VACATION) {
@@ -160,6 +173,42 @@ public class VacationController {
             if (!responseDto.isSuccessful()) {
                 buildErrorResponse(payload, responseDto.getErrorDescription(), response);
             }
+            ChatPostEphemeralResponse ephemeralResponse = slack.methods(accessToken).chatPostEphemeral(ChatPostEphemeralRequest.builder()
+                    .user(payload.getUser().getId())
+                    .token(accessToken)
+                    .text("Success")
+                    .channel(payload.getView().getCallbackId())
+                    .blocks(List.of(SectionBlock.builder()
+                                    .text(MarkdownTextObject.builder()
+                                            .text("New vacation info was saved successfully :desert_island:")
+                                            .build())
+                                    .build(),
+                            ActionsBlock.builder()
+                                    .blockId(ADD_VACATION.name())
+                                    .elements(List.of(
+                                            ButtonElement.builder()
+                                                    .style("primary")
+                                                    .text(PlainTextObject.builder()
+                                                            .text("Add Vacation")
+                                                            .emoji(true)
+                                                            .build())
+                                                    .actionId(ADD_VACATION.name())
+                                                    .build(),
+                                            ButtonElement.builder()
+                                                    .text(PlainTextObject.builder()
+                                                            .text("Show/Delete Vacation Info")
+                                                            .emoji(true)
+                                                            .build())
+                                                    .actionId(SHOW_VACATION.name()).build(),
+                                            ButtonElement.builder()
+                                                    .text(PlainTextObject.builder()
+                                                            .text("Close")
+                                                            .emoji(true)
+                                                            .build())
+                                                    .actionId(CLOSE_DIALOG.name()).build()))
+                                    .build()))
+                    .build());
+            System.out.println(ephemeralResponse);
         }
     }
 
@@ -173,7 +222,7 @@ public class VacationController {
                 .text(MarkdownTextObject.builder()
                         .text(String.format("`%s`", errorDescription))
                         .build()).build());
-        View viewWithError = ADD_VACATION_INFO_VIEW;
+        View viewWithError = buildAddVacationInfoView(payload.getView().getCallbackId());
         viewWithError.setBlocks(blocks);
         ViewSubmissionResponse submissionResponse = ViewSubmissionResponse.builder()
                 .responseAction("update")
