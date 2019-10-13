@@ -57,12 +57,19 @@ public class VacationService {
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(vacationInfoList.stream()
                         .sorted(Comparator.comparing(VacationInfo::getDateFrom))
-                        .map(v -> String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
-                                v.getSubstitutionUserIds() != null ? Arrays.stream(v.getSubstitutionUserIds().split(","))
-                                        .map(u -> String.format("<@%s>", u))
-                                        .collect(joining(", "))
-                                : ""))
+                        .map(v -> new ShowVacationInfoResponseDto.ShowVacationInfo()
+                                .setVacationInfo(String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
+                                        v.getSubstitutionUserIds() != null ? Arrays.stream(v.getSubstitutionUserIds().split(","))
+                                                .map(u -> String.format("<@%s>", u))
+                                                .collect(joining(", "))
+                                                : ""))
+                                .setVacationId(v.getId()))
                         .collect(toList()));
+    }
+
+    public void deleteVacationInfo(long vacationInfoId) {
+        vacationInfoRepository.deleteById(vacationInfoId);
+        log.info("VacationInfo with id [{}] was successfully deleted");
     }
 
     private Optional<String> validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {

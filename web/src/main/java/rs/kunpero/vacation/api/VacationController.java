@@ -47,6 +47,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
+import static rs.kunpero.vacation.util.ActionId.DELETE_VACATION;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
@@ -118,6 +119,10 @@ public class VacationController {
                         .build();
 
                 actionResponseSender.send(payload.getResponseUrl(), actionResponse);
+            }
+
+            if (actionId == DELETE_VACATION) {
+                vacationService.deleteVacationInfo(Long.valueOf(actions.get(0).getValue()));
             }
 
             if (actionId == CLOSE_DIALOG) {

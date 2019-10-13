@@ -14,12 +14,14 @@ import com.github.seratch.jslack.api.model.view.View;
 import com.github.seratch.jslack.api.model.view.ViewSubmit;
 import com.github.seratch.jslack.api.model.view.ViewTitle;
 import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
+import static rs.kunpero.vacation.util.ActionId.DELETE_VACATION;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
@@ -109,15 +111,16 @@ public class ViewHelper {
                             .build()))
             .build();
 
-    public static List<LayoutBlock> buildShowVacationBlocks(List<String> vacationInfoList) {
+    public static List<LayoutBlock> buildShowVacationBlocks(List<ShowVacationInfoResponseDto.ShowVacationInfo> vacationInfoList) {
         List<LayoutBlock> blocks = vacationInfoList.stream()
                 .map(v -> SectionBlock.builder()
                         .text(MarkdownTextObject.builder()
-                                .text(v)
+                                .text(v.getVacationInfo())
                                 .build())
                         .accessory(ButtonElement.builder()
                                 .style("danger")
-                                .actionId("DELETE")
+                                .actionId(DELETE_VACATION.name())
+                                .value(String.valueOf(v.getVacationId()))
                                 .text(PlainTextObject.builder()
                                         .text("Delete")
                                         .build())
