@@ -16,6 +16,7 @@ import com.github.seratch.jslack.api.model.view.ViewTitle;
 import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
 import rs.kunpero.vacation.service.dto.VacationInfoDto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -112,28 +113,37 @@ public class ViewHelper {
             .build();
 
     public static List<LayoutBlock> buildShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
-        List<LayoutBlock> blocks = vacationInfoList.stream()
-                .map(v -> SectionBlock.builder()
-                        .text(MarkdownTextObject.builder()
-                                .text(v.getVacationInfo())
-                                .build())
-                        .accessory(ButtonElement.builder()
-                                .style("danger")
-                                .actionId(DELETE_VACATION.name())
-                                .value(String.valueOf(v.getVacationId()))
-                                .text(PlainTextObject.builder()
-                                        .text("Delete")
-                                        .build())
-                                .build())
-                        .build())
-                .collect(Collectors.toList());
-        blocks.add(0, DividerBlock.builder().build());
-        blocks.add(0, SectionBlock.builder()
-                .text(MarkdownTextObject.builder()
-                        .text(":camping: Your current vacation info:")
-                        .build())
-                .build());
-        blocks.add(DividerBlock.builder().build());
+        List<LayoutBlock> blocks = new ArrayList<>();
+        if (vacationInfoList.isEmpty()) {
+            blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text("You have no vacations yet :white_frowning_face:")
+                            .build())
+                    .build());
+        } else {
+            blocks.addAll(vacationInfoList.stream()
+                    .map(v -> SectionBlock.builder()
+                            .text(MarkdownTextObject.builder()
+                                    .text(v.getVacationInfo())
+                                    .build())
+                            .accessory(ButtonElement.builder()
+                                    .style("danger")
+                                    .actionId(DELETE_VACATION.name())
+                                    .value(String.valueOf(v.getVacationId()))
+                                    .text(PlainTextObject.builder()
+                                            .text("Delete")
+                                            .build())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList()));
+            blocks.add(0, DividerBlock.builder().build());
+            blocks.add(0, SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text(":camping: Your current vacation info:")
+                            .build())
+                    .build());
+            blocks.add(DividerBlock.builder().build());
+        }
         blocks.add(ActionsBlock.builder()
                 .blockId(ADD_VACATION.name())
                 .elements(List.of(
