@@ -2,13 +2,9 @@ package rs.kunpero.vacation.api;
 
 import com.github.seratch.jslack.Slack;
 import com.github.seratch.jslack.api.methods.SlackApiException;
-import com.github.seratch.jslack.api.model.block.ActionsBlock;
-import com.github.seratch.jslack.api.model.block.DividerBlock;
 import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
-import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
-import com.github.seratch.jslack.api.model.block.element.ButtonElement;
 import com.github.seratch.jslack.api.model.view.View;
 import com.github.seratch.jslack.api.model.view.ViewState;
 import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
@@ -28,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import rs.kunpero.vacation.service.VacationService;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.DeleteVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.DeleteVacationInfoResponseDto;
 import rs.kunpero.vacation.service.dto.ShowVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
 import rs.kunpero.vacation.util.ActionId;
@@ -122,7 +120,21 @@ public class VacationController {
             }
 
             if (actionId == DELETE_VACATION) {
-                vacationService.deleteVacationInfo(Long.valueOf(actions.get(0).getValue()));
+                DeleteVacationInfoRequestDto requestDto = new DeleteVacationInfoRequestDto()
+                        .setVacationInfoId(Long.valueOf(actions.get(0).getValue()))
+                        .setUserId(payload.getUser().getId())
+                        .setTeamId(payload.getUser().getTeamId());
+                DeleteVacationInfoResponseDto responseDto = vacationService.deleteVacationInfo(requestDto);
+
+                List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
+
+                ActionResponse actionResponse = ActionResponse.builder()
+                        .replaceOriginal(true)
+                        .responseType("ephemeral")
+                        .blocks(blocks)
+                        .build();
+
+                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
             }
 
             if (actionId == CLOSE_DIALOG) {

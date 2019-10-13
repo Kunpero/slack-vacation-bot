@@ -7,6 +7,6 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-public class ShowVacationInfoResponseDto {
+public class DeleteVacationInfoResponseDto {
     List<VacationInfoDto> vacationInfoList;
 }

@@ -7,8 +7,11 @@ import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.DeleteVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.DeleteVacationInfoResponseDto;
 import rs.kunpero.vacation.service.dto.ShowVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.VacationInfoDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
 
 import java.time.LocalDate;
@@ -55,21 +58,15 @@ public class VacationService {
     public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
         List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
         return new ShowVacationInfoResponseDto()
-                .setVacationInfoList(vacationInfoList.stream()
-                        .sorted(Comparator.comparing(VacationInfo::getDateFrom))
-                        .map(v -> new ShowVacationInfoResponseDto.ShowVacationInfo()
-                                .setVacationInfo(String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
-                                        v.getSubstitutionUserIds() != null ? Arrays.stream(v.getSubstitutionUserIds().split(","))
-                                                .map(u -> String.format("<@%s>", u))
-                                                .collect(joining(", "))
-                                                : ""))
-                                .setVacationId(v.getId()))
-                        .collect(toList()));
+                .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
     }
 
-    public void deleteVacationInfo(long vacationInfoId) {
-        vacationInfoRepository.deleteById(vacationInfoId);
+    public DeleteVacationInfoResponseDto deleteVacationInfo(DeleteVacationInfoRequestDto request) {
+        vacationInfoRepository.deleteById(request.getVacationInfoId());
         log.info("VacationInfo with id [{}] was successfully deleted");
+        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+        return new DeleteVacationInfoResponseDto()
+                .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
     }
 
     private Optional<String> validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {
@@ -91,6 +88,19 @@ public class VacationService {
         return userVacations.stream()
                 .anyMatch(v -> isWithinRange(v.getDateFrom(), from, to) ||
                         isWithinRange(v.getDateTo(), from, to));
+    }
+
+    private List<VacationInfoDto> buildVacationInfoDtoList(List<VacationInfo> vacationInfoList) {
+        return vacationInfoList.stream()
+                .sorted(Comparator.comparing(VacationInfo::getDateFrom))
+                .map(v -> new VacationInfoDto()
+                        .setVacationInfo(String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
+                                v.getSubstitutionUserIds() != null ? Arrays.stream(v.getSubstitutionUserIds().split(","))
+                                        .map(u -> String.format("<@%s>", u))
+                                        .collect(joining(", "))
+                                        : ""))
+                        .setVacationId(v.getId()))
+                .collect(toList());
     }
 
     private AddVacationInfoResponseDto buildResponse(String source) {

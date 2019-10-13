@@ -14,7 +14,7 @@ import com.github.seratch.jslack.api.model.view.View;
 import com.github.seratch.jslack.api.model.view.ViewSubmit;
 import com.github.seratch.jslack.api.model.view.ViewTitle;
 import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
-import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.VacationInfoDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,7 +111,7 @@ public class ViewHelper {
                             .build()))
             .build();
 
-    public static List<LayoutBlock> buildShowVacationBlocks(List<ShowVacationInfoResponseDto.ShowVacationInfo> vacationInfoList) {
+    public static List<LayoutBlock> buildShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
         List<LayoutBlock> blocks = vacationInfoList.stream()
                 .map(v -> SectionBlock.builder()
                         .text(MarkdownTextObject.builder()
