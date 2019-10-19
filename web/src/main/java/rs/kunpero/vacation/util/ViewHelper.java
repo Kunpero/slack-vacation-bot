@@ -1,5 +1,6 @@
 package rs.kunpero.vacation.util;
 
+import com.github.seratch.jslack.api.methods.request.chat.ChatPostEphemeralRequest;
 import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.DividerBlock;
 import com.github.seratch.jslack.api.model.block.InputBlock;
@@ -165,5 +166,46 @@ public class ViewHelper {
                                 .actionId(CLOSE_DIALOG.name()).build()))
                 .build());
         return blocks;
+    }
+
+
+    public static ChatPostEphemeralRequest buildChatPostEphemeralRequest(String userId, String accessToken, String callbackId) {
+        return ChatPostEphemeralRequest.builder()
+                .user(userId)
+                .token(accessToken)
+                .text("Success")
+                .channel(callbackId)
+                .blocks(List.of(SectionBlock.builder()
+                                .text(MarkdownTextObject.builder()
+                                        .text("New vacation info was saved successfully :desert_island:")
+                                        .build())
+                                .build(),
+                        ActionsBlock.builder()
+                                .blockId(ADD_VACATION.name())
+                                .elements(List.of(
+                                        ButtonElement.builder()
+                                                .style("primary")
+                                                .text(PlainTextObject.builder()
+                                                        .text("Add Vacation")
+                                                        .emoji(true)
+                                                        .build())
+                                                .actionId(ADD_VACATION.name())
+                                                .build(),
+                                        ButtonElement.builder()
+                                                .text(PlainTextObject.builder()
+                                                        .text("Show/Delete Vacation Info")
+                                                        .emoji(true)
+                                                        .build())
+                                                .actionId(SHOW_VACATION.name())
+                                                .build(),
+                                        ButtonElement.builder()
+                                                .text(PlainTextObject.builder()
+                                                        .text("Close")
+                                                        .emoji(true)
+                                                        .build())
+                                                .actionId(CLOSE_DIALOG.name())
+                                                .build()))
+                                .build()))
+                .build();
     }
 }
