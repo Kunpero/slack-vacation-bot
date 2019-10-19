@@ -177,7 +177,7 @@ public class ViewHelper {
                 .channel(callbackId)
                 .blocks(List.of(SectionBlock.builder()
                                 .text(MarkdownTextObject.builder()
-                                        .text("New vacation info was saved successfully :desert_island:")
+                                        .text("New vacation info was successfully saved :desert_island:")
                                         .build())
                                 .build(),
                         ActionsBlock.builder()

@@ -2,16 +2,12 @@ package rs.kunpero.vacation.api;
 
 import com.github.seratch.jslack.Slack;
 import com.github.seratch.jslack.api.methods.SlackApiException;
-import com.github.seratch.jslack.api.methods.request.chat.ChatPostEphemeralRequest;
-import com.github.seratch.jslack.api.methods.response.chat.ChatPostEphemeralResponse;
-import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
-import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
-import com.github.seratch.jslack.api.model.block.element.ButtonElement;
 import com.github.seratch.jslack.api.model.view.View;
 import com.github.seratch.jslack.api.model.view.ViewState;
+import com.github.seratch.jslack.api.webhook.WebhookResponse;
 import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.BlockActionPayload;
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.PayloadTypeDetector;
@@ -61,6 +57,7 @@ import static rs.kunpero.vacation.util.BlockId.ERROR;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
 import static rs.kunpero.vacation.util.ViewHelper.buildAddVacationInfoView;
+import static rs.kunpero.vacation.util.ViewHelper.buildChatPostEphemeralRequest;
 import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 
 @RestController
@@ -68,6 +65,9 @@ import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 @RequestMapping("/vacation")
 public class VacationController {
     private static final PayloadTypeDetector TYPE_DETECTOR = new PayloadTypeDetector();
+
+    private static final String BLOCK_ACTIONS_TYPE = "block_actions";
+    private static final String VIEW_SUBMISSION_TYPE = "view_submission";
 
     private final VacationService vacationService;
     private final Gson gson;
@@ -97,119 +97,84 @@ public class VacationController {
                 .replaceFirst("payload=", "");
 
         String type = TYPE_DETECTOR.detectType(body);
-        if ("block_actions".equals(type)) {
-            BlockActionPayload payload = gson.fromJson(body, BlockActionPayload.class);
-            List<BlockActionPayload.Action> actions = payload.getActions();
-            ActionId actionId = ActionId.safeValueOf(actions.get(0).getActionId());
-
-            if (actionId == ADD_VACATION) {
-                slack.methods(accessToken).viewsOpen(req -> req
-                        .view(buildAddVacationInfoView(payload.getChannel().getId()))
-                        .triggerId(payload.getTriggerId()));
-
-                ActionResponse actionResponse = ActionResponse.builder()
-                        .deleteOriginal(true)
-                        .text(" ")
-                        .responseType("ephemeral")
-                        .build();
-
-                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
-            }
-
-            if (actionId == SHOW_VACATION) {
-                ShowVacationInfoRequestDto requestDto = new ShowVacationInfoRequestDto()
-                        .setUserId(payload.getUser().getId())
-                        .setTeamId(payload.getUser().getTeamId());
-                ShowVacationInfoResponseDto responseDto = vacationService.showVacationInfo(requestDto);
-                List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
-
-                ActionResponse actionResponse = ActionResponse.builder()
-                        .replaceOriginal(true)
-                        .responseType("ephemeral")
-                        .blocks(blocks)
-                        .build();
-
-                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
-            }
-
-            if (actionId == DELETE_VACATION) {
-                DeleteVacationInfoRequestDto requestDto = new DeleteVacationInfoRequestDto()
-                        .setVacationInfoId(Long.valueOf(actions.get(0).getValue()))
-                        .setUserId(payload.getUser().getId())
-                        .setTeamId(payload.getUser().getTeamId());
-                DeleteVacationInfoResponseDto responseDto = vacationService.deleteVacationInfo(requestDto);
-
-                List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
-
-                ActionResponse actionResponse = ActionResponse.builder()
-                        .replaceOriginal(true)
-                        .responseType("ephemeral")
-                        .blocks(blocks)
-                        .build();
-
-                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
-            }
-
-            if (actionId == CLOSE_DIALOG) {
-                ActionResponse actionResponse = ActionResponse.builder()
-                        .deleteOriginal(true)
-                        .responseType("ephemeral")
-                        .build();
-
-                actionResponseSender.send(payload.getResponseUrl(), actionResponse);
-            }
-            response.setStatus(HttpServletResponse.SC_OK);
-        } else if ("view_submission".equals(type)) {
-            // TODO: check hash
-            ViewSubmissionPayload payload = gson.fromJson(body, ViewSubmissionPayload.class);
-            Map<String, Map<String, ViewState.Value>> valuesMap = payload.getView().getState().getValues();
-            AddVacationInfoRequestDto requestDto = new AddVacationInfoRequestDto()
-                    .setUserId(payload.getUser().getId())
-                    .setTeamId(payload.getUser().getTeamId())
-                    .setDateFrom(LocalDate.parse(valuesMap.get(DATE_FROM.name()).get(SET_FROM.name()).getSelectedDate()))
-                    .setDateTo(LocalDate.parse(valuesMap.get(DATE_TO.name()).get(SET_TO.name()).getSelectedDate()))
-                    .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers());
-            AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
-            if (!responseDto.isSuccessful()) {
-                buildErrorResponse(payload, responseDto.getErrorDescription(), response);
-            }
-            ChatPostEphemeralResponse ephemeralResponse = slack.methods(accessToken).chatPostEphemeral(ChatPostEphemeralRequest.builder()
-                    .user(payload.getUser().getId())
-                    .token(accessToken)
-                    .text("Success")
-                    .channel(payload.getView().getCallbackId())
-                    .blocks(List.of(SectionBlock.builder()
-                                    .text(MarkdownTextObject.builder()
-                                            .text("New vacation info was saved successfully :desert_island:")
-                                            .build())
-                                    .build(),
-                            ActionsBlock.builder()
-                                    .blockId(ADD_VACATION.name())
-                                    .elements(List.of(
-                                            ButtonElement.builder()
-                                                    .style("primary")
-                                                    .text(PlainTextObject.builder()
-                                                            .text("Add Vacation")
-                                                            .emoji(true)
-                                                            .build())
-                                                    .actionId(ADD_VACATION.name())
-                                                    .build(),
-                                            ButtonElement.builder()
-                                                    .text(PlainTextObject.builder()
-                                                            .text("Show/Delete Vacation Info")
-                                                            .emoji(true)
-                                                            .build())
-                                                    .actionId(SHOW_VACATION.name()).build(),
-                                            ButtonElement.builder()
-                                                    .text(PlainTextObject.builder()
-                                                            .text("Close")
-                                                            .emoji(true)
-                                                            .build())
-                                                    .actionId(CLOSE_DIALOG.name()).build()))
-                                    .build()))
-                    .build());
-            System.out.println(ephemeralResponse);
+        if (BLOCK_ACTIONS_TYPE.equals(type)) {
+            handleBlockActions(body);
+        } else if (VIEW_SUBMISSION_TYPE.equals(type)) {
+            handleViewSubmission(body, response);
         }
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void handleBlockActions(String body) throws IOException, SlackApiException {
+        BlockActionPayload payload = gson.fromJson(body, BlockActionPayload.class);
+        List<BlockActionPayload.Action> actions = payload.getActions();
+        ActionId actionId = ActionId.safeValueOf(actions.get(0).getActionId());
+
+        ActionResponse actionResponse = null;
+        if (actionId == ADD_VACATION) {
+            slack.methods(accessToken).viewsOpen(req -> req
+                    .view(buildAddVacationInfoView(payload.getChannel().getId()))
+                    .triggerId(payload.getTriggerId()));
+
+            actionResponse = ActionResponse.builder()
+                    .deleteOriginal(true)
+                    .responseType("ephemeral")
+                    .build();
+        } else if (actionId == SHOW_VACATION) {
+            ShowVacationInfoRequestDto requestDto = new ShowVacationInfoRequestDto()
+                    .setUserId(payload.getUser().getId())
+                    .setTeamId(payload.getUser().getTeamId());
+            ShowVacationInfoResponseDto responseDto = vacationService.showVacationInfo(requestDto);
+
+            List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
+            actionResponse = ActionResponse.builder()
+                    .replaceOriginal(true)
+                    .responseType("ephemeral")
+                    .blocks(blocks)
+                    .build();
+        } else if (actionId == DELETE_VACATION) {
+            DeleteVacationInfoRequestDto requestDto = new DeleteVacationInfoRequestDto()
+                    .setVacationInfoId(Long.valueOf(actions.get(0).getValue()))
+                    .setUserId(payload.getUser().getId())
+                    .setTeamId(payload.getUser().getTeamId());
+            DeleteVacationInfoResponseDto responseDto = vacationService.deleteVacationInfo(requestDto);
+
+            List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
+            actionResponse = ActionResponse.builder()
+                    .replaceOriginal(true)
+                    .responseType("ephemeral")
+                    .blocks(blocks)
+                    .build();
+
+        } else if (actionId == CLOSE_DIALOG) {
+            actionResponse = ActionResponse.builder()
+                    .deleteOriginal(true)
+                    .responseType("ephemeral")
+                    .build();
+
+        }
+
+        WebhookResponse response = actionResponseSender.send(payload.getResponseUrl(), actionResponse);
+        log.debug(response.toString());
+    }
+
+    private void handleViewSubmission(String body, HttpServletResponse response) throws IOException, SlackApiException {
+        ViewSubmissionPayload payload = gson.fromJson(body, ViewSubmissionPayload.class);
+        Map<String, Map<String, ViewState.Value>> valuesMap = payload.getView().getState().getValues();
+        AddVacationInfoRequestDto requestDto = new AddVacationInfoRequestDto()
+                .setUserId(payload.getUser().getId())
+                .setTeamId(payload.getUser().getTeamId())
+                .setDateFrom(LocalDate.parse(valuesMap.get(DATE_FROM.name()).get(SET_FROM.name()).getSelectedDate()))
+                .setDateTo(LocalDate.parse(valuesMap.get(DATE_TO.name()).get(SET_TO.name()).getSelectedDate()))
+                .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers());
+        AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
+
+        if (responseDto.isSuccessful()) {
+            slack.methods(accessToken)
+                    .chatPostEphemeral(buildChatPostEphemeralRequest(payload.getUser().getId(), accessToken, payload.getView().getCallbackId()));
+            return;
+        }
+        buildErrorResponse(payload, responseDto.getErrorDescription(), response);
     }
 
     private void buildErrorResponse(ViewSubmissionPayload payload, String errorDescription, HttpServletResponse response) throws IOException {
