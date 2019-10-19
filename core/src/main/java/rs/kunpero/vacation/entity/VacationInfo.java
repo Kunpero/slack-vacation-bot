@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class VacationInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VACATION_INFO")
-    private long id;
+    private Long id;
 
     @Column(name = "USER_ID", length = 21, nullable = false)
     private String userId;
