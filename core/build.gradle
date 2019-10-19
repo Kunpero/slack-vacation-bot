@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+sourceCompatibility = 1.11
+
+dependencies {
+
+    implementation libraries.springBootStarter
+    implementation libraries.springBootDataJpa
+    implementation libraries.lombok
+    implementation libraries.oracle
+    annotationProcessor libraries.lombok
+    
+    testCompile libraries.springBootStarterTest
+    testRuntime('com.h2database:h2')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+
+dependencyManagement {
+    imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"){
+        bomProperty("kotlin.version", "1.3.0")
+    } }
+}
+repositories {
+    mavenCentral()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
