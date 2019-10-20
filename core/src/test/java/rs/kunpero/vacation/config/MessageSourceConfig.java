@@ -9,7 +9,7 @@ public class MessageSourceConfig {
     @Bean
     public ResourceBundleMessageSource messageSource() {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
-        source.setBasenames("message");
+        source.setBasenames("messages");
         return source;
     }
 }

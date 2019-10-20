@@ -29,7 +29,7 @@ public class VacationInfoRepositoryTest {
 
 
         VacationInfo actualVacation = userVacations.get(0);
-        VacationInfo expectedVacation = new VacationInfo(0,
+        VacationInfo expectedVacation = new VacationInfo(0L,
                 userId,
                 teamId,
                 LocalDate.of(2018, Month.JUNE, 16),

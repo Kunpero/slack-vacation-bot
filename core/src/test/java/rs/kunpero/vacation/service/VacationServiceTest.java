@@ -81,7 +81,7 @@ public class VacationServiceTest {
         var from = LocalDate.of(2018, Month.JUNE, 17);
         var to = from.plusDays(2);
         var substitutionUserIds = List.of("USER1", "USER2");
-        var interferedVacation = new VacationInfo(0, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2");
+        var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2");
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
