@@ -1,7 +1,7 @@
 ext {
     springBootVersion   = '2.1.8.RELEASE'
     jodaTimeVersion     = '2.10.3'
-    jSlackVersion       = '3.0.0-RC1'
+    jSlackVersion       = '3.0.0-RC3'
 
     withoutTomcat = { exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat' }
     withoutWebSocket = { exclude group: 'org.eclipse.jetty.websocket' }
