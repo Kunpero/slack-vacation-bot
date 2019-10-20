@@ -1,1 +1,0 @@
-web: java -Dserver.port=$PORT -jar build/libs/slack-bot-1.0-SNAPSHOT.jar
