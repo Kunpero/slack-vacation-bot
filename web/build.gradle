@@ -15,6 +15,7 @@ dependencies {
     implementation libraries.jSlack
     implementation libraries.gson
     implementation libraries.commonsIo
+    implementation libraries.springBootBucket4j
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 

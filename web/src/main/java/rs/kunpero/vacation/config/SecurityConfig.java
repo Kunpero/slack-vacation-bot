@@ -16,7 +16,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .mvcMatchers("/vacation/**")
                 .permitAll()
-                .and().csrf().disable();
+                .and()
+                .requiresChannel()
+                .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                .requiresSecure();
     }
 
     @Bean

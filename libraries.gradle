@@ -14,6 +14,7 @@ ext {
             springBootStarterJetty          : "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
             springBootDataJpa               : "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
             springBootSecurity              : "org.springframework.boot:spring-boot-starter-security:${springBootVersion}",
+            springBootBucket4j              : "com.giffing.bucket4j.spring.boot.starter:bucket4j-spring-boot-starter-springboot2:0.1.15",
             oracle                          : "com.oracle:ojdbc7:12.1.0.2",
             postgres                        : "org.postgresql:postgresql:42.2.8",
             jSlack                          : "com.github.seratch:jslack:${jSlackVersion}",
