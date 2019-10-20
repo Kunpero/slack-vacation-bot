@@ -10,8 +10,12 @@ import java.util.Locale;
 
 @Component
 public class MessageSourceHelper {
+    private final MessageSource messageSource;
+
     @Autowired
-    private MessageSource messageSource;
+    public MessageSourceHelper(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     @Value("${default.locale}")
     private String defaultLocale;

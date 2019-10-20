@@ -62,7 +62,7 @@ public class ViewHelper {
                             .build()))
             .build();
 
-    public static final View buildAddVacationInfoView(String channelId) {
+    public static View buildAddVacationInfoView(String channelId) {
         return View.builder()
                 .type("modal")
                 .callbackId(channelId)
@@ -112,6 +112,34 @@ public class ViewHelper {
                                                 .build())
                                         .build())
                                 .build()))
+                .build();
+    }
+
+    public static SlashCommandResponse buildCurrentDateVacationInfo(List<VacationInfoDto> vacationInfoList) {
+
+        List<LayoutBlock> blocks = new ArrayList<>();
+        blocks.add(SectionBlock.builder()
+                .text(MarkdownTextObject.builder()
+                        .text(":notebook_with_decorative_cover: Vacation info for current date:")
+                        .build())
+                .build());
+        blocks.addAll(vacationInfoList.stream()
+                .map(v -> SectionBlock.builder()
+                        .text(MarkdownTextObject.builder()
+                                .text(v.getVacationInfo())
+                                .build())
+                        .build())
+                .collect(Collectors.toList()));
+        blocks.add(ActionsBlock.builder()
+                .elements(List.of(ButtonElement.builder()
+                        .text(PlainTextObject.builder()
+                                .text("Close")
+                                .emoji(true)
+                                .build())
+                        .actionId(CLOSE_DIALOG.name()).build())).build());
+        return SlashCommandResponse.builder()
+                .responseType("ephemeral")
+                .blocks(blocks)
                 .build();
     }
 
