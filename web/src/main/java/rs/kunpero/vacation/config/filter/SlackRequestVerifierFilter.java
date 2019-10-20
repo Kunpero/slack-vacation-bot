@@ -19,8 +19,12 @@ import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 @Slf4j
 public class SlackRequestVerifierFilter extends GenericFilterBean {
+    private final SlackSignatureVerifier slackSignatureVerifier;
+
     @Autowired
-    private SlackSignatureVerifier slackSignatureVerifier;
+    public SlackRequestVerifierFilter(SlackSignatureVerifier slackSignatureVerifier) {
+        this.slackSignatureVerifier = slackSignatureVerifier;
+    }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
