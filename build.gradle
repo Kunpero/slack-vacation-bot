@@ -13,3 +13,8 @@ allprojects {
 }
 
 apply from: "./libraries.gradle"
+
+
+tasks.register("stage") {
+    dependsOn = ['web:build', 'web:clean']
+}
