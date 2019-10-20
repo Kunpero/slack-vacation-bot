@@ -50,4 +50,11 @@ public class VacationInfoRepositoryTest {
         Assert.assertNotNull(savedEntity);
     }
 
+    @Test
+    public void findByTeamIdAndDateBetweenTest() {
+        final String teamId = "TEAM1";
+        final LocalDate date = LocalDate.of(2019, Month.JANUARY, 14);
+        List<VacationInfo> userVacations = vacationInfoRepository.findByTeamIdAndDateBetween(teamId, date);
+        Assert.assertEquals(2, userVacations.size());
+    }
 }

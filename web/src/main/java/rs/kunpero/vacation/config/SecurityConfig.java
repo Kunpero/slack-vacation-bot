@@ -1,5 +1,6 @@
 package rs.kunpero.vacation.config;
 
+import com.github.seratch.jslack.app_backend.events.servlet.SlackSignatureVerifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -24,8 +25,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public SlackRequestVerifierFilter slackRequestVerifierFilter() {
-        return new SlackRequestVerifierFilter();
+    public SlackRequestVerifierFilter slackRequestVerifierFilter(SlackSignatureVerifier slackSignatureVerifier) {
+        return new SlackRequestVerifierFilter(slackSignatureVerifier);
     }
 
     @Bean

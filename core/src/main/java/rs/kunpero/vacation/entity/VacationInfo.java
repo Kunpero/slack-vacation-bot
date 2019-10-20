@@ -9,9 +9,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDate;
 
-@Entity(name = "VACATION_INFO")
+@Entity
+@Table(name = "VACATION_INFO")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

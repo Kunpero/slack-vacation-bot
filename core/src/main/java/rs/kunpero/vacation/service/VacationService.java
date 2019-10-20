@@ -69,6 +69,13 @@ public class VacationService {
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
     }
 
+    public ShowVacationInfoResponseDto showCurrentDayVacationInfo(String teamId) {
+        LocalDate date = LocalDate.now();
+        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateBetween(teamId, date);
+        return new ShowVacationInfoResponseDto()
+                .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
+    }
+
     private Optional<String> validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {
         if (from.isAfter(to)) {
             log.warn("dateFrom [{}] must be before dateTo [{}]", from, to);
