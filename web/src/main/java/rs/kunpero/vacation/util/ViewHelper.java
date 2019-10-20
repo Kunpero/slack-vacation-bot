@@ -8,6 +8,7 @@ import com.github.seratch.jslack.api.model.block.LayoutBlock;
 import com.github.seratch.jslack.api.model.block.SectionBlock;
 import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
 import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
+import com.github.seratch.jslack.api.model.block.element.BlockElement;
 import com.github.seratch.jslack.api.model.block.element.ButtonElement;
 import com.github.seratch.jslack.api.model.block.element.DatePickerElement;
 import com.github.seratch.jslack.api.model.block.element.MultiUsersSelectElement;
@@ -33,6 +34,31 @@ import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 
 public class ViewHelper {
+    private static final List<BlockElement> MAIN_BUTTONS = List.of(
+            ButtonElement.builder()
+                    .style("primary")
+                    .text(PlainTextObject.builder()
+                            .text("Add Vacation")
+                            .emoji(true)
+                            .build())
+                    .actionId(ADD_VACATION.name())
+                    .build(),
+            ButtonElement.builder()
+                    .text(PlainTextObject.builder()
+                            .text("Show/Delete Vacation Info")
+                            .emoji(true)
+                            .build())
+                    .actionId(SHOW_VACATION.name())
+                    .build(),
+            ButtonElement.builder()
+                    .text(PlainTextObject.builder()
+                            .text("Close")
+                            .emoji(true)
+                            .build())
+                    .actionId(CLOSE_DIALOG.name())
+                    .build()
+    );
+
     public static final SlashCommandResponse START_MENU = SlashCommandResponse.builder()
             .responseType("ephemeral")
             .blocks(List.of(
@@ -44,21 +70,7 @@ public class ViewHelper {
                     DividerBlock.builder().build(),
                     ActionsBlock.builder()
                             .blockId(ADD_VACATION.name())
-                            .elements(List.of(
-                                    ButtonElement.builder()
-                                            .style("primary")
-                                            .text(PlainTextObject.builder()
-                                                    .text("Add Vacation")
-                                                    .emoji(true)
-                                                    .build())
-                                            .actionId(ADD_VACATION.name())
-                                            .build(),
-                                    ButtonElement.builder()
-                                            .text(PlainTextObject.builder()
-                                                    .text("Show/Delete Vacation Info")
-                                                    .emoji(true)
-                                                    .build())
-                                            .actionId(SHOW_VACATION.name()).build()))
+                            .elements(MAIN_BUTTONS)
                             .build()))
             .build();
 
@@ -123,20 +135,30 @@ public class ViewHelper {
                         .text(":notebook_with_decorative_cover: Vacation info for current date:")
                         .build())
                 .build());
-        blocks.addAll(vacationInfoList.stream()
-                .map(v -> SectionBlock.builder()
-                        .text(MarkdownTextObject.builder()
-                                .text(v.getVacationInfo())
-                                .build())
-                        .build())
-                .collect(Collectors.toList()));
+        if (!vacationInfoList.isEmpty()) {
+            blocks.addAll(vacationInfoList.stream()
+                    .map(v -> SectionBlock.builder()
+                            .text(MarkdownTextObject.builder()
+                                    .text(v.getVacationInfo())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList()));
+        } else {
+            blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text("No active vacations :white_frowning_face:")
+                            .build())
+                    .build());
+        }
         blocks.add(ActionsBlock.builder()
                 .elements(List.of(ButtonElement.builder()
                         .text(PlainTextObject.builder()
                                 .text("Close")
                                 .emoji(true)
                                 .build())
-                        .actionId(CLOSE_DIALOG.name()).build())).build());
+                        .actionId(CLOSE_DIALOG.name())
+                        .build()))
+                .build());
         return SlashCommandResponse.builder()
                 .responseType("ephemeral")
                 .blocks(blocks)
@@ -210,29 +232,7 @@ public class ViewHelper {
                                 .build(),
                         ActionsBlock.builder()
                                 .blockId(ADD_VACATION.name())
-                                .elements(List.of(
-                                        ButtonElement.builder()
-                                                .style("primary")
-                                                .text(PlainTextObject.builder()
-                                                        .text("Add Vacation")
-                                                        .emoji(true)
-                                                        .build())
-                                                .actionId(ADD_VACATION.name())
-                                                .build(),
-                                        ButtonElement.builder()
-                                                .text(PlainTextObject.builder()
-                                                        .text("Show/Delete Vacation Info")
-                                                        .emoji(true)
-                                                        .build())
-                                                .actionId(SHOW_VACATION.name())
-                                                .build(),
-                                        ButtonElement.builder()
-                                                .text(PlainTextObject.builder()
-                                                        .text("Close")
-                                                        .emoji(true)
-                                                        .build())
-                                                .actionId(CLOSE_DIALOG.name())
-                                                .build()))
+                                .elements(MAIN_BUTTONS)
                                 .build()))
                 .build();
     }
