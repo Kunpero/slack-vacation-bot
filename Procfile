@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar web/build/libs/web.jar
+web: java -Dserver.port=$PORT -jar web/build/libs/slack-bot.jar
