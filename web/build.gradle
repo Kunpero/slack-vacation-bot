@@ -7,6 +7,12 @@ plugins {
 
 sourceCompatibility = 1.11
 
+
+bootJar {
+    baseName "slack-bot"
+    launchScript()
+}
+
 dependencies {
     implementation project(":core")
     implementation libraries.springBootStarterWeb, withoutTomcat
