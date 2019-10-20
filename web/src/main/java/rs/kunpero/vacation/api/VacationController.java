@@ -12,6 +12,8 @@ import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponse
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.BlockActionPayload;
 import com.github.seratch.jslack.app_backend.interactive_messages.payload.PayloadTypeDetector;
 import com.github.seratch.jslack.app_backend.interactive_messages.response.ActionResponse;
+import com.github.seratch.jslack.app_backend.slash_commands.payload.SlashCommandPayload;
+import com.github.seratch.jslack.app_backend.slash_commands.payload.SlashCommandPayloadParser;
 import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
 import com.github.seratch.jslack.app_backend.views.payload.ViewSubmissionPayload;
 import com.github.seratch.jslack.app_backend.views.response.ViewSubmissionResponse;
@@ -19,6 +21,7 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,6 +61,7 @@ import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
 import static rs.kunpero.vacation.util.ViewHelper.buildAddVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelper.buildChatPostEphemeralRequest;
+import static rs.kunpero.vacation.util.ViewHelper.buildCurrentDateVacationInfo;
 import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 
 @RestController
@@ -65,6 +69,7 @@ import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 @RequestMapping("/vacation")
 public class VacationController {
     private static final PayloadTypeDetector TYPE_DETECTOR = new PayloadTypeDetector();
+    private static final SlashCommandPayloadParser SLASH_COMMAND_PAYLOAD_PARSER = new SlashCommandPayloadParser();
 
     private static final String BLOCK_ACTIONS_TYPE = "block_actions";
     private static final String VIEW_SUBMISSION_TYPE = "view_submission";
@@ -86,7 +91,16 @@ public class VacationController {
     private String accessToken;
 
     @RequestMapping(value = "/start", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
-    public SlashCommandResponse start() {
+    public SlashCommandResponse start(HttpServletRequest request) throws IOException {
+        String body = request.getReader().lines().collect(Collectors.joining());
+        body = URLDecoder.decode(body, StandardCharsets.UTF_8);
+
+        SlashCommandPayload payload = SLASH_COMMAND_PAYLOAD_PARSER.parse(body);
+
+        if (!StringUtils.isEmpty(payload.getText()) && "now".equals(payload.getText())) {
+            ShowVacationInfoResponseDto responseDto = vacationService.showCurrentDayVacationInfo(payload.getTeamId());
+            return buildCurrentDateVacationInfo(responseDto.getVacationInfoList());
+        }
         return START_MENU;
     }
 

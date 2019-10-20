@@ -58,7 +58,7 @@ public class VacationService {
     public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
         List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
         return new ShowVacationInfoResponseDto()
-                .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
+                .setVacationInfoList(buildVacationInfoDtoListForUser(vacationInfoList));
     }
 
     public DeleteVacationInfoResponseDto deleteVacationInfo(DeleteVacationInfoRequestDto request) {
@@ -66,7 +66,7 @@ public class VacationService {
         log.info("VacationInfo with id [{}] was successfully deleted", request.getVacationInfoId());
         List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
         return new DeleteVacationInfoResponseDto()
-                .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
+                .setVacationInfoList(buildVacationInfoDtoListForUser(vacationInfoList));
     }
 
     public ShowVacationInfoResponseDto showCurrentDayVacationInfo(String teamId) {
@@ -101,13 +101,29 @@ public class VacationService {
         return vacationInfoList.stream()
                 .sorted(Comparator.comparing(VacationInfo::getDateFrom))
                 .map(v -> new VacationInfoDto()
-                        .setVacationInfo(String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
-                                v.getSubstitutionUserIds() != null ? Arrays.stream(v.getSubstitutionUserIds().split(","))
-                                        .map(u -> String.format("<@%s>", u))
-                                        .collect(joining(", "))
-                                        : ""))
+                        .setVacationInfo(String.format("<@%s> `%s` - `%s` %s", v.getUserId(), v.getDateFrom(), v.getDateTo(),
+                                formSubstitutionUserList(v.getSubstitutionUserIds())))
                         .setVacationId(v.getId()))
                 .collect(toList());
+    }
+
+    private List<VacationInfoDto> buildVacationInfoDtoListForUser(List<VacationInfo> vacationInfoList) {
+        return vacationInfoList.stream()
+                .sorted(Comparator.comparing(VacationInfo::getDateFrom))
+                .map(v -> new VacationInfoDto()
+                        .setVacationInfo(String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
+                                formSubstitutionUserList(v.getSubstitutionUserIds())))
+                        .setVacationId(v.getId()))
+                .collect(toList());
+    }
+
+    private String formSubstitutionUserList(String substitutionUserIds) {
+        if (substitutionUserIds == null) {
+            return "";
+        }
+        return Arrays.stream(substitutionUserIds.split(","))
+                .map(u -> String.format("<@%s>", u))
+                .collect(joining(", "));
     }
 
     private AddVacationInfoResponseDto buildResponse(String source) {
