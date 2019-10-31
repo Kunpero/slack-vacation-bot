@@ -61,7 +61,7 @@ import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
 import static rs.kunpero.vacation.util.ViewHelper.buildAddVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelper.buildChatPostEphemeralRequest;
-import static rs.kunpero.vacation.util.ViewHelper.buildCurrentDateVacationInfo;
+import static rs.kunpero.vacation.util.ViewHelper.buildVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
 
 @RestController
@@ -99,12 +99,12 @@ public class VacationController {
 
         if (!StringUtils.isEmpty(payload.getText()) && "now".equals(payload.getText())) {
             ShowVacationInfoResponseDto responseDto = vacationService.showCurrentDayVacationInfo(payload.getTeamId());
-            return buildCurrentDateVacationInfo(responseDto.getVacationInfoList());
+            return buildVacationInfoView(responseDto.getVacationInfoList(), "Vacation info for current date:");
         }
 
         if (!StringUtils.isEmpty(payload.getText()) && "all".equals(payload.getText())) {
             ShowVacationInfoResponseDto responseDto = vacationService.showAllActualVacations(payload.getTeamId());
-            return buildCurrentDateVacationInfo(responseDto.getVacationInfoList());
+            return buildVacationInfoView(responseDto.getVacationInfoList(), "Upcoming vacations:");
         }
         return START_MENU;
     }

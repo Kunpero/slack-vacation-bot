@@ -127,12 +127,12 @@ public class ViewHelper {
                 .build();
     }
 
-    public static SlashCommandResponse buildCurrentDateVacationInfo(List<VacationInfoDto> vacationInfoList) {
+    public static SlashCommandResponse buildVacationInfoView(List<VacationInfoDto> vacationInfoList, String message) {
 
         List<LayoutBlock> blocks = new ArrayList<>();
         blocks.add(SectionBlock.builder()
                 .text(MarkdownTextObject.builder()
-                        .text(":notebook_with_decorative_cover: Vacation info for current date:")
+                        .text(":notebook_with_decorative_cover: " + message)
                         .build())
                 .build());
         if (!vacationInfoList.isEmpty()) {
