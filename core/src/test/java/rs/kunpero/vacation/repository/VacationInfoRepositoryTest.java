@@ -57,4 +57,12 @@ public class VacationInfoRepositoryTest {
         List<VacationInfo> userVacations = vacationInfoRepository.findByTeamIdAndDateBetween(teamId, date);
         Assert.assertEquals(2, userVacations.size());
     }
+
+    @Test
+    public void findByTeamIdAndDateFromAfterTest() {
+        final String teamId = "TEAM1";
+        final LocalDate date = LocalDate.of(2019, Month.JANUARY, 8);
+        List<VacationInfo> userVacations = vacationInfoRepository.findByTeamIdAndDateFromGreaterThanEqual(teamId, date);
+        Assert.assertEquals(3, userVacations.size());
+    }
 }
