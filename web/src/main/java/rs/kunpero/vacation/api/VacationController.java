@@ -101,6 +101,11 @@ public class VacationController {
             ShowVacationInfoResponseDto responseDto = vacationService.showCurrentDayVacationInfo(payload.getTeamId());
             return buildCurrentDateVacationInfo(responseDto.getVacationInfoList());
         }
+
+        if (!StringUtils.isEmpty(payload.getText()) && "all".equals(payload.getText())) {
+            ShowVacationInfoResponseDto responseDto = vacationService.showAllActualVacations(payload.getTeamId());
+            return buildCurrentDateVacationInfo(responseDto.getVacationInfoList());
+        }
         return START_MENU;
     }
 
