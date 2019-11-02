@@ -1,5 +1,6 @@
 package rs.kunpero.vacation.service;
 
+import com.github.seratch.jslack.api.methods.SlackApiException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,12 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import rs.kunpero.vacation.config.MessageSourceConfig;
+import rs.kunpero.vacation.config.TestConfig;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collections;
@@ -25,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {MessageSourceConfig.class, VacationService.class, MessageSourceHelper.class})
+@SpringBootTest(classes = {TestConfig.class, VacationService.class, MessageSourceHelper.class})
 public class VacationServiceTest {
 
     @MockBean
@@ -34,7 +36,7 @@ public class VacationServiceTest {
     private VacationService vacationService;
 
     @Test
-    public void successfulAddOperationTest() {
+    public void successfulAddOperationTest() throws IOException, SlackApiException {
         var userId = "USER0";
         var teamId = "TEAM0";
         var from = LocalDate.of(2018, Month.JUNE, 17);
@@ -57,7 +59,7 @@ public class VacationServiceTest {
     }
 
     @Test
-    public void vacationPeriodDateFromIsAfterDateToErrorTest() {
+    public void vacationPeriodDateFromIsAfterDateToErrorTest() throws IOException, SlackApiException {
         var userId = "USER0";
         var teamId = "TEAM0";
         var from = LocalDate.of(2018, Month.JUNE, 17);
@@ -75,7 +77,7 @@ public class VacationServiceTest {
     }
 
     @Test
-    public void vacationPeriodInterfereErrorTest() {
+    public void vacationPeriodInterfereErrorTest() throws IOException, SlackApiException {
         var userId = "USER0";
         var teamId = "TEAM0";
         var from = LocalDate.of(2018, Month.JUNE, 17);

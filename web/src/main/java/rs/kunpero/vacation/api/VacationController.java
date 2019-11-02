@@ -62,7 +62,7 @@ import static rs.kunpero.vacation.util.ViewHelperUtils.START_MENU;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildAddVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildChatPostEphemeralRequest;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildVacationInfoView;
-import static rs.kunpero.vacation.util.ViewHelperUtils.buildShowVacationBlocks;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildUserShowVacationBlocks;
 
 @RestController
 @Slf4j
@@ -145,7 +145,7 @@ public class VacationController {
                     .setTeamId(payload.getUser().getTeamId());
             ShowVacationInfoResponseDto responseDto = vacationService.showVacationInfo(requestDto);
 
-            List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
+            List<LayoutBlock> blocks = buildUserShowVacationBlocks(responseDto.getVacationInfoList());
             actionResponse = ActionResponse.builder()
                     .replaceOriginal(true)
                     .responseType("ephemeral")
@@ -158,7 +158,7 @@ public class VacationController {
                     .setTeamId(payload.getUser().getTeamId());
             DeleteVacationInfoResponseDto responseDto = vacationService.deleteVacationInfo(requestDto);
 
-            List<LayoutBlock> blocks = buildShowVacationBlocks(responseDto.getVacationInfoList());
+            List<LayoutBlock> blocks = buildUserShowVacationBlocks(responseDto.getVacationInfoList());
             actionResponse = ActionResponse.builder()
                     .replaceOriginal(true)
                     .responseType("ephemeral")

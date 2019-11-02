@@ -166,7 +166,7 @@ public class ViewHelperUtils {
                 .build();
     }
 
-    public static List<LayoutBlock> buildShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
+    public static List<LayoutBlock> buildUserShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
         List<LayoutBlock> blocks = new ArrayList<>();
         if (vacationInfoList.isEmpty()) {
             blocks.add(SectionBlock.builder()
@@ -219,7 +219,6 @@ public class ViewHelperUtils {
         return blocks;
     }
 
-
     public static ChatPostEphemeralRequest buildChatPostEphemeralRequest(String userId, String accessToken, String callbackId) {
         return ChatPostEphemeralRequest.builder()
                 .user(userId)
@@ -236,5 +235,41 @@ public class ViewHelperUtils {
                                 .elements(MAIN_BUTTONS)
                                 .build()))
                 .build();
+    }
+
+    public static ChatPostMessageRequest buildChatPostRequest(String accessToken, String channelId,
+                                                              List<VacationInfoDto> vacationInfoList) {
+        return ChatPostMessageRequest.builder()
+                .token(accessToken)
+                .channel(channelId)
+                .blocks(buildChannelShowVacationBlocks(vacationInfoList))
+                .build();
+    }
+
+    private static List<LayoutBlock> buildChannelShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
+        List<LayoutBlock> blocks = new ArrayList<>();
+        if (vacationInfoList.isEmpty()) {
+            blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text("No vacations yet :white_frowning_face:")
+                            .build())
+                    .build());
+        } else {
+            blocks.addAll(vacationInfoList.stream()
+                    .map(v -> SectionBlock.builder()
+                            .text(MarkdownTextObject.builder()
+                                    .text(v.getVacationInfo())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList()));
+            blocks.add(0, DividerBlock.builder().build());
+            blocks.add(0, SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text(":umbrella_on_ground: Actual vacation info:")
+                            .build())
+                    .build());
+            blocks.add(DividerBlock.builder().build());
+        }
+        return blocks;
     }
 }
