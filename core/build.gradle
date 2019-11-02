@@ -13,6 +13,7 @@ dependencies {
     implementation libraries.springBootDataJpa
     implementation libraries.lombok
     implementation libraries.postgres
+    implementation libraries.jSlack
     annotationProcessor libraries.lombok
     
     testCompile libraries.springBootStarterTest

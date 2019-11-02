@@ -1,6 +1,7 @@
 package rs.kunpero.vacation.util;
 
 import com.github.seratch.jslack.api.methods.request.chat.ChatPostEphemeralRequest;
+import com.github.seratch.jslack.api.methods.request.chat.ChatPostMessageRequest;
 import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.DividerBlock;
 import com.github.seratch.jslack.api.model.block.InputBlock;
