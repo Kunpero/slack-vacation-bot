@@ -33,7 +33,7 @@ import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 
-public class ViewHelper {
+public class ViewHelperUtils {
     private static final List<BlockElement> MAIN_BUTTONS = List.of(
             ButtonElement.builder()
                     .style("primary")

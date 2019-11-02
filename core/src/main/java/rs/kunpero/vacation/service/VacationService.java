@@ -18,7 +18,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -30,6 +34,8 @@ import static rs.kunpero.vacation.util.VacationUtils.isWithinRange;
 public class VacationService {
     private final VacationInfoRepository vacationInfoRepository;
     private final MessageSourceHelper messageSourceHelper;
+
+    private Map<String, ReentrantLock> teamIdLockMap = new ConcurrentHashMap<>();
 
     @Autowired
     public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper) {
@@ -52,6 +58,8 @@ public class VacationService {
         vacationInfoRepository.save(vacationInfo);
 
         log.info("VacationInfo was saved successfully");
+
+        notifySelectedChannel(request.getTeamId());
         return buildResponse("add.vacation.success");
     }
 
@@ -65,6 +73,8 @@ public class VacationService {
         vacationInfoRepository.deleteById(request.getVacationInfoId());
         log.info("VacationInfo with id [{}] was successfully deleted", request.getVacationInfoId());
         List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+
+        notifySelectedChannel(request.getTeamId());
         return new DeleteVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoListForUser(vacationInfoList));
     }
@@ -82,6 +92,24 @@ public class VacationService {
 
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
+    }
+
+    private void notifySelectedChannel(String teamId) {
+        Lock lock = getLock(teamId);
+        try {
+            lock.lock();
+            LocalDate date = LocalDate.now();
+            List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateFromGreaterThanEqual(teamId, date);
+
+
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private ReentrantLock getLock(String teamId) {
+        teamIdLockMap.putIfAbsent(teamId, new ReentrantLock());
+        return teamIdLockMap.get(teamId);
     }
 
     private Optional<String> validatePeriod(String userId, String teamId, LocalDate from, LocalDate to) {

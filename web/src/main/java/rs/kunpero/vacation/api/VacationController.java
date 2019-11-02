@@ -58,11 +58,11 @@ import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.ERROR;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
-import static rs.kunpero.vacation.util.ViewHelper.START_MENU;
-import static rs.kunpero.vacation.util.ViewHelper.buildAddVacationInfoView;
-import static rs.kunpero.vacation.util.ViewHelper.buildChatPostEphemeralRequest;
-import static rs.kunpero.vacation.util.ViewHelper.buildVacationInfoView;
-import static rs.kunpero.vacation.util.ViewHelper.buildShowVacationBlocks;
+import static rs.kunpero.vacation.util.ViewHelperUtils.START_MENU;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildAddVacationInfoView;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildChatPostEphemeralRequest;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildVacationInfoView;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildShowVacationBlocks;
 
 @RestController
 @Slf4j
