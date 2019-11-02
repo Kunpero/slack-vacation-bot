@@ -9,8 +9,14 @@ with next parameters:
 
 You can't add vacations with crossing dates.
   
-To show active vacations that interfere with current date, type `/vacation now`.
-To show upcoming vacations type `/vacation all`
+To show active vacations that interfere with current date, type `/vacation now`.<br>
+To show upcoming vacations type `/vacation all`>br>
+<br><br>
+If you want to notify channel with actual vacation info, set next properties:
+`
+channel.notification.enabled=true 
+notified.channel.id={selected channel id}
+`
 
 <h3>Launch slack-vacation in your workspace</h3>
 1) Go to https://api.slack.com/apps and create new app in your slack workspace

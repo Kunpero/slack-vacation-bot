@@ -1,6 +1,7 @@
 package rs.kunpero.vacation.util;
 
 import com.github.seratch.jslack.api.methods.request.chat.ChatPostEphemeralRequest;
+import com.github.seratch.jslack.api.methods.request.chat.ChatPostMessageRequest;
 import com.github.seratch.jslack.api.model.block.ActionsBlock;
 import com.github.seratch.jslack.api.model.block.DividerBlock;
 import com.github.seratch.jslack.api.model.block.InputBlock;
@@ -33,7 +34,7 @@ import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 
-public class ViewHelper {
+public class ViewHelperUtils {
     private static final List<BlockElement> MAIN_BUTTONS = List.of(
             ButtonElement.builder()
                     .style("primary")
@@ -165,7 +166,7 @@ public class ViewHelper {
                 .build();
     }
 
-    public static List<LayoutBlock> buildShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
+    public static List<LayoutBlock> buildUserShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
         List<LayoutBlock> blocks = new ArrayList<>();
         if (vacationInfoList.isEmpty()) {
             blocks.add(SectionBlock.builder()
@@ -218,7 +219,6 @@ public class ViewHelper {
         return blocks;
     }
 
-
     public static ChatPostEphemeralRequest buildChatPostEphemeralRequest(String userId, String accessToken, String callbackId) {
         return ChatPostEphemeralRequest.builder()
                 .user(userId)
@@ -235,5 +235,41 @@ public class ViewHelper {
                                 .elements(MAIN_BUTTONS)
                                 .build()))
                 .build();
+    }
+
+    public static ChatPostMessageRequest buildChatPostRequest(String accessToken, String channelId,
+                                                              List<VacationInfoDto> vacationInfoList) {
+        return ChatPostMessageRequest.builder()
+                .token(accessToken)
+                .channel(channelId)
+                .blocks(buildChannelShowVacationBlocks(vacationInfoList))
+                .build();
+    }
+
+    private static List<LayoutBlock> buildChannelShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
+        List<LayoutBlock> blocks = new ArrayList<>();
+        if (vacationInfoList.isEmpty()) {
+            blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text("No vacations yet :white_frowning_face:")
+                            .build())
+                    .build());
+        } else {
+            blocks.addAll(vacationInfoList.stream()
+                    .map(v -> SectionBlock.builder()
+                            .text(MarkdownTextObject.builder()
+                                    .text(v.getVacationInfo())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList()));
+            blocks.add(0, DividerBlock.builder().build());
+            blocks.add(0, SectionBlock.builder()
+                    .text(MarkdownTextObject.builder()
+                            .text(":umbrella_on_ground: Actual vacation info:")
+                            .build())
+                    .build());
+            blocks.add(DividerBlock.builder().build());
+        }
+        return blocks;
     }
 }
