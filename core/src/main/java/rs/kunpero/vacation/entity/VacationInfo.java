@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.time.LocalDate;
 
@@ -19,7 +20,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class VacationInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VACATION_INFO")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vacation_info_generator")
+    @SequenceGenerator(name = "vacation_info_generator", sequenceName = "SEQ_VACATION_INFO")
     private Long id;
 
     @Column(name = "USER_ID", length = 21, nullable = false)
