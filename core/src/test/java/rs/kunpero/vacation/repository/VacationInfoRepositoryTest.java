@@ -59,10 +59,10 @@ public class VacationInfoRepositoryTest {
     }
 
     @Test
-    public void findByTeamIdAndDateFromAfterTest() {
+    public void findByTeamIdAndDateToAfterTest() {
         final String teamId = "TEAM1";
         final LocalDate date = LocalDate.of(2019, Month.JANUARY, 8);
-        List<VacationInfo> userVacations = vacationInfoRepository.findByTeamIdAndDateFromGreaterThanEqual(teamId, date);
+        List<VacationInfo> userVacations = vacationInfoRepository.findByTeamIdAndDateToGreaterThanEqual(teamId, date);
         Assert.assertEquals(3, userVacations.size());
     }
 }

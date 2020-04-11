@@ -16,5 +16,5 @@ public interface VacationInfoRepository extends CrudRepository<VacationInfo, Lon
     @Query("from VacationInfo v where v.teamId = :teamId and :date between v.dateFrom and v.dateTo")
     List<VacationInfo> findByTeamIdAndDateBetween(@Param("teamId") String teamId, @Param("date") LocalDate date);
 
-    List<VacationInfo> findByTeamIdAndDateFromGreaterThanEqual(String teamId, LocalDate date);
+    List<VacationInfo> findByTeamIdAndDateToGreaterThanEqual(String teamId, LocalDate date);
 }
