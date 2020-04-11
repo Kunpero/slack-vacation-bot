@@ -101,7 +101,7 @@ public class VacationService {
 
     public ShowVacationInfoResponseDto showAllActualVacations(String teamId) {
         LocalDate date = LocalDate.now();
-        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateFromGreaterThanEqual(teamId, date);
+        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateToGreaterThanEqual(teamId, date);
 
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
@@ -115,7 +115,7 @@ public class VacationService {
         try {
             LOCK.lock();
             LocalDate date = LocalDate.now();
-            List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateFromGreaterThanEqual(teamId, date);
+            List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateToGreaterThanEqual(teamId, date);
             ChatPostMessageResponse response = slack.methods(accessToken)
                     .chatPostMessage(buildChatPostRequest(accessToken, channelId, buildVacationInfoDtoList(vacationInfoList)));
             log.debug(response.toString());
