@@ -1,12 +1,11 @@
 package rs.kunpero.vacation.config;
 
-import com.github.seratch.jslack.Slack;
-import com.github.seratch.jslack.app_backend.SlackSignature;
-import com.github.seratch.jslack.app_backend.events.servlet.SlackSignatureVerifier;
-import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
-import com.github.seratch.jslack.app_backend.interactive_messages.ResponseSender;
-import com.github.seratch.jslack.common.json.GsonFactory;
 import com.google.gson.Gson;
+import com.slack.api.Slack;
+import com.slack.api.app_backend.SlackSignature;
+import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
+import com.slack.api.app_backend.interactive_components.ActionResponseSender;
+import com.slack.api.util.json.GsonFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +23,8 @@ public class SlackConfig {
     }
 
     @Bean
-    public ResponseSender responseSender(Slack slack) {
-        return new ResponseSender(slack);
+    public ActionResponseSender responseSender(Slack slack) {
+        return new ActionResponseSender(slack);
     }
 
     @Bean
@@ -42,7 +41,7 @@ public class SlackConfig {
 
     @Bean
     public SlackSignature.Generator slackSignatureGenerator() {
-       return new SlackSignature.Generator(signingSecret);
+        return new SlackSignature.Generator(signingSecret);
     }
 
     @Bean

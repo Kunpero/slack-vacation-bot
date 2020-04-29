@@ -1,6 +1,6 @@
 package rs.kunpero.vacation.service;
 
-import com.github.seratch.jslack.api.methods.SlackApiException;
+import com.slack.api.methods.SlackApiException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,6 +1,6 @@
 package rs.kunpero.vacation.config;
 
-import com.github.seratch.jslack.app_backend.events.servlet.SlackSignatureVerifier;
+import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
