@@ -18,4 +18,6 @@ public class AddVacationInfoRequestDto {
     private LocalDate dateTo;
 
     private List<String> substitutionIdList;
+
+    private String comment;
 }

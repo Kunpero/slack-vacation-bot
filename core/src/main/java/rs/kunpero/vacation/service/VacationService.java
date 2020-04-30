@@ -20,7 +20,9 @@ import rs.kunpero.vacation.util.MessageSourceHelper;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -30,11 +32,14 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static rs.kunpero.vacation.util.VacationUtils.convertListToString;
 import static rs.kunpero.vacation.util.VacationUtils.isWithinRange;
+import static rs.kunpero.vacation.util.VacationUtils.wrapIntoInlineMarkdown;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildChatPostRequest;
 
 @Service
 @Slf4j
 public class VacationService {
+    public static final int COMMENT_MAX_LENGTH = 512;
+
     private static final ReentrantLock LOCK = new ReentrantLock();
 
     private final VacationInfoRepository vacationInfoRepository;
@@ -60,20 +65,22 @@ public class VacationService {
         var dateFrom = request.getDateFrom();
         var dateTo = request.getDateTo();
 
-        Optional<String> errorMessage = validatePeriod(request.getUserId(), request.getTeamId(), dateFrom, dateTo);
-        if (errorMessage.isPresent()) {
-            return buildResponse(errorMessage.get());
+        List<String> errorMessages = new ArrayList<>();
+        validatePeriod(request.getUserId(), request.getTeamId(), dateFrom, dateTo).ifPresent(errorMessages::add);
+        validateComment(request.getComment()).ifPresent(errorMessages::add);
+        if (!errorMessages.isEmpty()) {
+            return buildResponse(errorMessages);
         }
 
         String substitutionUserIds = convertListToString(request.getSubstitutionIdList());
-        VacationInfo vacationInfo = new VacationInfo(request.getUserId(), request.getTeamId(),
-                dateFrom, dateTo, substitutionUserIds);
+        VacationInfo vacationInfo = new VacationInfo(request.getUserId(), request.getTeamId(), dateFrom, dateTo,
+                substitutionUserIds, request.getComment());
         vacationInfoRepository.save(vacationInfo);
 
         log.info("VacationInfo was saved successfully");
 
         notifySelectedChannel(request.getTeamId());
-        return buildResponse("add.vacation.success");
+        return buildResponse(Collections.singletonList("add.vacation.success"));
     }
 
     public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
@@ -138,6 +145,18 @@ public class VacationService {
         return Optional.empty();
     }
 
+    private Optional<String> validateComment(String comment) {
+        final int commentMaxLength = COMMENT_MAX_LENGTH;
+        if (comment != null) {
+            final int commentLength = comment.length();
+            if (commentLength > commentMaxLength) {
+                log.warn("Comment length was [{}], but max length is [{}]", commentLength, commentMaxLength);
+                return Optional.of("vacation.comment.length.exceeded");
+            }
+        }
+        return Optional.empty();
+    }
+
     private boolean checkVacationsForUser(String userId, String teamId, LocalDate from, LocalDate to) {
         var userVacations = vacationInfoRepository.findByUserIdAndTeamId(userId, teamId);
         return userVacations.stream()
@@ -149,8 +168,8 @@ public class VacationService {
         return vacationInfoList.stream()
                 .sorted(Comparator.comparing(VacationInfo::getDateFrom))
                 .map(v -> new VacationInfoDto()
-                        .setVacationInfo(String.format("<@%s> `%s` - `%s` %s", v.getUserId(), v.getDateFrom(), v.getDateTo(),
-                                formSubstitutionUserList(v.getSubstitutionUserIds())))
+                        .setVacationInfo(String.format("<@%s> `%s` - `%s` %s %s", v.getUserId(), v.getDateFrom(), v.getDateTo(),
+                                formSubstitutionUserList(v.getSubstitutionUserIds()), v.getComment() != null ? "\n" + v.getComment() : ""))
                         .setVacationId(v.getId()))
                 .collect(toList());
     }
@@ -159,8 +178,8 @@ public class VacationService {
         return vacationInfoList.stream()
                 .sorted(Comparator.comparing(VacationInfo::getDateFrom))
                 .map(v -> new VacationInfoDto()
-                        .setVacationInfo(String.format("`%s` - `%s` %s", v.getDateFrom(), v.getDateTo(),
-                                formSubstitutionUserList(v.getSubstitutionUserIds())))
+                        .setVacationInfo(String.format("`%s` - `%s` %s %s", v.getDateFrom(), v.getDateTo(),
+                                formSubstitutionUserList(v.getSubstitutionUserIds()), v.getComment() != null ? "\n" + v.getComment() : ""))
                         .setVacationId(v.getId()))
                 .collect(toList());
     }
@@ -175,9 +194,11 @@ public class VacationService {
                 .collect(joining(", "));
     }
 
-    private AddVacationInfoResponseDto buildResponse(String source) {
+    private AddVacationInfoResponseDto buildResponse(List<String> sourceList) {
         return new AddVacationInfoResponseDto()
-                .setErrorCode(messageSourceHelper.getCode(source))
-                .setErrorDescription(messageSourceHelper.getMessage(source, null));
+                .setErrorCode(messageSourceHelper.getCode(sourceList.get(0)))
+                .setErrorDescription(sourceList.stream()
+                        .map(s -> wrapIntoInlineMarkdown(messageSourceHelper.getMessage(s, null)))
+                        .collect(joining("\n")));
     }
 }

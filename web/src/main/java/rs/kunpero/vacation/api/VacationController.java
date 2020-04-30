@@ -50,10 +50,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.vacation.util.ActionId.DELETE_VACATION;
+import static rs.kunpero.vacation.util.ActionId.SET_COMMENT;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
 import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
+import static rs.kunpero.vacation.util.BlockId.COMMENT;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.ERROR;
@@ -185,7 +187,8 @@ public class VacationController {
                 .setTeamId(payload.getUser().getTeamId())
                 .setDateFrom(LocalDate.parse(valuesMap.get(DATE_FROM.name()).get(SET_FROM.name()).getSelectedDate()))
                 .setDateTo(LocalDate.parse(valuesMap.get(DATE_TO.name()).get(SET_TO.name()).getSelectedDate()))
-                .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers());
+                .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers())
+                .setComment(valuesMap.get(COMMENT.name()).get(SET_COMMENT.name()).getValue());
         AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
 
         if (responseDto.isSuccessful()) {
@@ -204,7 +207,7 @@ public class VacationController {
         blocks.add(SectionBlock.builder()
                 .blockId(ERROR.name())
                 .text(MarkdownTextObject.builder()
-                        .text(String.format("`%s`", errorDescription))
+                        .text(errorDescription)
                         .build()).build());
         View viewWithError = buildAddVacationInfoView(payload.getView().getCallbackId());
         viewWithError.setBlocks(blocks);

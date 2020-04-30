@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.StringUtils;
 import rs.kunpero.vacation.config.TestConfig;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
@@ -25,6 +26,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static rs.kunpero.vacation.service.VacationService.COMMENT_MAX_LENGTH;
+import static rs.kunpero.vacation.util.VacationUtils.wrapIntoInlineMarkdown;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestConfig.class, VacationService.class, MessageSourceHelper.class})
@@ -55,7 +58,7 @@ public class VacationServiceTest {
         verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor.capture());
         Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor.getValue().getSubstitutionUserIds());
         Assert.assertEquals(0, response.getErrorCode());
-        Assert.assertEquals("add.vacation.success.message", response.getErrorDescription());
+        Assert.assertEquals(wrapIntoInlineMarkdown("add.vacation.success.message"), response.getErrorDescription());
     }
 
     @Test
@@ -72,7 +75,7 @@ public class VacationServiceTest {
                 .setSubstitutionIdList(null);
         var response = vacationService.addVacationInfo(request);
         Assert.assertEquals(3, response.getErrorCode());
-        Assert.assertEquals("vacation.period.wrong.sequence.message", response.getErrorDescription());
+        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.wrong.sequence.message"), response.getErrorDescription());
 
     }
 
@@ -83,7 +86,10 @@ public class VacationServiceTest {
         var from = LocalDate.of(2018, Month.JUNE, 17);
         var to = from.plusDays(2);
         var substitutionUserIds = List.of("USER1", "USER2");
-        var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2");
+        final String comment = "Comment";
+
+        var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
+                comment);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
@@ -94,6 +100,31 @@ public class VacationServiceTest {
                 .setSubstitutionIdList(substitutionUserIds);
         var response = vacationService.addVacationInfo(request);
         Assert.assertEquals(3, response.getErrorCode());
-        Assert.assertEquals("vacation.period.interfere.error.message", response.getErrorDescription());
+        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.interfere.error.message"), response.getErrorDescription());
+    }
+
+    @Test
+    public void vacationWrongPeriodAndCommentErrorTest() throws IOException, SlackApiException {
+        var userId = "USER0";
+        var teamId = "TEAM0";
+        var from = LocalDate.of(2018, Month.JUNE, 17);
+        var to = from.plusDays(2);
+        var substitutionUserIds = List.of("USER1", "USER2");
+        final String comment = "A".repeat(COMMENT_MAX_LENGTH + 1);
+
+        var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
+                comment);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to)
+                .setSubstitutionIdList(substitutionUserIds)
+                .setComment(comment);
+        var response = vacationService.addVacationInfo(request);
+        Assert.assertEquals(3, response.getErrorCode());
+        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.interfere.error.message")+ "\n" + wrapIntoInlineMarkdown("vacation.comment.length.exceeded.message"), response.getErrorDescription());
     }
 }

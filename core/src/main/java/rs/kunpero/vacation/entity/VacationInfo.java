@@ -39,11 +39,16 @@ public class VacationInfo {
     @Column(name = "SUBSTITUTION_USER_IDS")
     private String substitutionUserIds;
 
-    public VacationInfo(String userId, String teamId, LocalDate dateFrom, LocalDate dateTo, String substitutionUserIds) {
+    @Column(name = "COMMENT")
+    private String comment;
+
+    public VacationInfo(String userId, String teamId, LocalDate dateFrom, LocalDate dateTo, String substitutionUserIds,
+                        String comment) {
         this.userId = userId;
         this.teamId = teamId;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
         this.substitutionUserIds = substitutionUserIds;
+        this.comment = comment;
     }
 }
