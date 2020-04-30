@@ -16,5 +16,10 @@ class VacationUtils {
             }
             return list.distinct().joinToString(",")
         }
+
+        @JvmStatic
+        fun wrapIntoInlineMarkdown(value: String):String {
+            return String.format("`%s`", value)
+        }
     }
 }

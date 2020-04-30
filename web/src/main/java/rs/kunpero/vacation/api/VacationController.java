@@ -1,23 +1,23 @@
 package rs.kunpero.vacation.api;
 
-import com.github.seratch.jslack.Slack;
-import com.github.seratch.jslack.api.methods.SlackApiException;
-import com.github.seratch.jslack.api.model.block.LayoutBlock;
-import com.github.seratch.jslack.api.model.block.SectionBlock;
-import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
-import com.github.seratch.jslack.api.model.view.View;
-import com.github.seratch.jslack.api.model.view.ViewState;
-import com.github.seratch.jslack.api.webhook.WebhookResponse;
-import com.github.seratch.jslack.app_backend.interactive_messages.ActionResponseSender;
-import com.github.seratch.jslack.app_backend.interactive_messages.payload.BlockActionPayload;
-import com.github.seratch.jslack.app_backend.interactive_messages.payload.PayloadTypeDetector;
-import com.github.seratch.jslack.app_backend.interactive_messages.response.ActionResponse;
-import com.github.seratch.jslack.app_backend.slash_commands.payload.SlashCommandPayload;
-import com.github.seratch.jslack.app_backend.slash_commands.payload.SlashCommandPayloadParser;
-import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
-import com.github.seratch.jslack.app_backend.views.payload.ViewSubmissionPayload;
-import com.github.seratch.jslack.app_backend.views.response.ViewSubmissionResponse;
 import com.google.gson.Gson;
+import com.slack.api.Slack;
+import com.slack.api.app_backend.dialogs.payload.PayloadTypeDetector;
+import com.slack.api.app_backend.interactive_components.ActionResponseSender;
+import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
+import com.slack.api.app_backend.interactive_components.response.ActionResponse;
+import com.slack.api.app_backend.slash_commands.SlashCommandPayloadParser;
+import com.slack.api.app_backend.slash_commands.payload.SlashCommandPayload;
+import com.slack.api.app_backend.slash_commands.response.SlashCommandResponse;
+import com.slack.api.app_backend.views.payload.ViewSubmissionPayload;
+import com.slack.api.app_backend.views.response.ViewSubmissionResponse;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.SectionBlock;
+import com.slack.api.model.block.composition.MarkdownTextObject;
+import com.slack.api.model.view.View;
+import com.slack.api.model.view.ViewState;
+import com.slack.api.webhook.WebhookResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,10 +50,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.vacation.util.ActionId.DELETE_VACATION;
+import static rs.kunpero.vacation.util.ActionId.SET_COMMENT;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
 import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
+import static rs.kunpero.vacation.util.BlockId.COMMENT;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.ERROR;
@@ -61,8 +63,8 @@ import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
 import static rs.kunpero.vacation.util.ViewHelperUtils.START_MENU;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildAddVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildChatPostEphemeralRequest;
-import static rs.kunpero.vacation.util.ViewHelperUtils.buildVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildUserShowVacationBlocks;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildVacationInfoView;
 
 @RestController
 @Slf4j
@@ -185,7 +187,8 @@ public class VacationController {
                 .setTeamId(payload.getUser().getTeamId())
                 .setDateFrom(LocalDate.parse(valuesMap.get(DATE_FROM.name()).get(SET_FROM.name()).getSelectedDate()))
                 .setDateTo(LocalDate.parse(valuesMap.get(DATE_TO.name()).get(SET_TO.name()).getSelectedDate()))
-                .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers());
+                .setSubstitutionIdList(valuesMap.get(SUBSTITUTION.name()).get(SET_SUBSTITUTION.name()).getSelectedUsers())
+                .setComment(valuesMap.get(COMMENT.name()).get(SET_COMMENT.name()).getValue());
         AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
 
         if (responseDto.isSuccessful()) {
@@ -204,7 +207,7 @@ public class VacationController {
         blocks.add(SectionBlock.builder()
                 .blockId(ERROR.name())
                 .text(MarkdownTextObject.builder()
-                        .text(String.format("`%s`", errorDescription))
+                        .text(errorDescription)
                         .build()).build());
         View viewWithError = buildAddVacationInfoView(payload.getView().getCallbackId());
         viewWithError.setBlocks(blocks);

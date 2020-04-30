@@ -1,7 +1,7 @@
 package rs.kunpero.vacation.config.filter;
 
-import com.github.seratch.jslack.app_backend.SlackSignature;
-import com.github.seratch.jslack.app_backend.events.servlet.SlackSignatureVerifier;
+import com.slack.api.app_backend.SlackSignature;
+import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.GenericFilterBean;

@@ -1,35 +1,39 @@
 package rs.kunpero.vacation.util;
 
-import com.github.seratch.jslack.api.methods.request.chat.ChatPostEphemeralRequest;
-import com.github.seratch.jslack.api.methods.request.chat.ChatPostMessageRequest;
-import com.github.seratch.jslack.api.model.block.ActionsBlock;
-import com.github.seratch.jslack.api.model.block.DividerBlock;
-import com.github.seratch.jslack.api.model.block.InputBlock;
-import com.github.seratch.jslack.api.model.block.LayoutBlock;
-import com.github.seratch.jslack.api.model.block.SectionBlock;
-import com.github.seratch.jslack.api.model.block.composition.MarkdownTextObject;
-import com.github.seratch.jslack.api.model.block.composition.PlainTextObject;
-import com.github.seratch.jslack.api.model.block.element.BlockElement;
-import com.github.seratch.jslack.api.model.block.element.ButtonElement;
-import com.github.seratch.jslack.api.model.block.element.DatePickerElement;
-import com.github.seratch.jslack.api.model.block.element.MultiUsersSelectElement;
-import com.github.seratch.jslack.api.model.view.View;
-import com.github.seratch.jslack.api.model.view.ViewSubmit;
-import com.github.seratch.jslack.api.model.view.ViewTitle;
-import com.github.seratch.jslack.app_backend.slash_commands.response.SlashCommandResponse;
+import com.slack.api.app_backend.slash_commands.response.SlashCommandResponse;
+import com.slack.api.methods.request.chat.ChatPostEphemeralRequest;
+import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.model.block.ActionsBlock;
+import com.slack.api.model.block.DividerBlock;
+import com.slack.api.model.block.InputBlock;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.SectionBlock;
+import com.slack.api.model.block.composition.MarkdownTextObject;
+import com.slack.api.model.block.composition.PlainTextObject;
+import com.slack.api.model.block.element.BlockElement;
+import com.slack.api.model.block.element.ButtonElement;
+import com.slack.api.model.block.element.DatePickerElement;
+import com.slack.api.model.block.element.MultiUsersSelectElement;
+import com.slack.api.model.block.element.PlainTextInputElement;
+import com.slack.api.model.view.View;
+import com.slack.api.model.view.ViewSubmit;
+import com.slack.api.model.view.ViewTitle;
 import rs.kunpero.vacation.service.dto.VacationInfoDto;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static rs.kunpero.vacation.service.VacationService.COMMENT_MAX_LENGTH;
 import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.vacation.util.ActionId.DELETE_VACATION;
+import static rs.kunpero.vacation.util.ActionId.SET_COMMENT;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
 import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
+import static rs.kunpero.vacation.util.BlockId.COMMENT;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
@@ -122,6 +126,22 @@ public class ViewHelperUtils {
                                         .actionId(SET_SUBSTITUTION.name())
                                         .placeholder(PlainTextObject.builder()
                                                 .text("Choose your substitution")
+                                                .build())
+                                        .build())
+                                .build(),
+                        InputBlock.builder()
+                                .blockId(COMMENT.name())
+                                .optional(true)
+                                .label(PlainTextObject.builder()
+                                        .text("Comment")
+                                        .emoji(true)
+                                        .build())
+                                .element(PlainTextInputElement.builder()
+                                        .actionId(SET_COMMENT.name())
+                                        .maxLength(COMMENT_MAX_LENGTH)
+                                        .multiline(true)
+                                        .placeholder(PlainTextObject.builder()
+                                                .text("Write down your commentary (512 symbols)")
                                                 .build())
                                         .build())
                                 .build()))

@@ -1,6 +1,6 @@
 package rs.kunpero.vacation.config;
 
-import com.github.seratch.jslack.Slack;
+import com.slack.api.Slack;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;

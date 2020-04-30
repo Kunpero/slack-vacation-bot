@@ -1,7 +1,7 @@
 ext {
     springBootVersion   = '2.1.8.RELEASE'
     jodaTimeVersion     = '2.10.3'
-    jSlackVersion       = '3.0.0-RC3'
+    jSlackVersion       = '1.0.6'
 
     withoutTomcat = { exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat' }
     withoutWebSocket = { exclude group: 'org.eclipse.jetty.websocket' }
@@ -17,7 +17,7 @@ ext {
             springBootBucket4j              : "com.giffing.bucket4j.spring.boot.starter:bucket4j-spring-boot-starter-springboot2:0.1.15",
             oracle                          : "com.oracle:ojdbc7:12.1.0.2",
             postgres                        : "org.postgresql:postgresql:42.2.8",
-            jSlack                          : "com.github.seratch:jslack:${jSlackVersion}",
+            slackAppBackend                 : "com.slack.api:slack-app-backend:${jSlackVersion}",
             gson                            : "com.google.code.gson:gson:2.8.5",
             lombok                          : "org.projectlombok:lombok:1.18.10",
             commonsIo                       : "commons-io:commons-io:2.6"
