@@ -85,6 +85,7 @@ public class VacationService {
 
     public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
         List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+        vacationInfoList.removeIf(v -> v.getDateTo().isBefore(LocalDate.now()));
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoListForUser(vacationInfoList));
     }
