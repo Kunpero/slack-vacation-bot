@@ -84,7 +84,10 @@ public class VacationService {
     }
 
     public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
-        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+        String teamId = request.getTeamId();
+        List<VacationInfo> vacationInfoList =
+                request.isAdmin() ? vacationInfoRepository.findByTeamId(teamId)
+                        : vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), teamId);
         vacationInfoList.removeIf(v -> v.getDateTo().isBefore(LocalDate.now()));
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoListForUser(vacationInfoList));
@@ -93,7 +96,10 @@ public class VacationService {
     public DeleteVacationInfoResponseDto deleteVacationInfo(DeleteVacationInfoRequestDto request) throws IOException, SlackApiException {
         vacationInfoRepository.deleteById(request.getVacationInfoId());
         log.info("VacationInfo with id [{}] was successfully deleted", request.getVacationInfoId());
-        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+        String teamId = request.getTeamId();
+        List<VacationInfo> vacationInfoList =
+                request.isAdmin() ? vacationInfoRepository.findByTeamId(teamId)
+                        : vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), teamId);
 
         notifySelectedChannel(request.getTeamId());
         return new DeleteVacationInfoResponseDto()

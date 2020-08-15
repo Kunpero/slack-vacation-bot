@@ -15,6 +15,7 @@ import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.DatePickerElement;
 import com.slack.api.model.block.element.MultiUsersSelectElement;
 import com.slack.api.model.block.element.PlainTextInputElement;
+import com.slack.api.model.block.element.UsersSelectElement;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewSubmit;
 import com.slack.api.model.view.ViewTitle;
@@ -32,11 +33,13 @@ import static rs.kunpero.vacation.util.ActionId.SET_COMMENT;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.ActionId.SET_VACATION_USER;
 import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
 import static rs.kunpero.vacation.util.BlockId.COMMENT;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
+import static rs.kunpero.vacation.util.BlockId.VACATION_USER;
 
 public class ViewHelperUtils {
     private static final List<BlockElement> MAIN_BUTTONS = List.of(
@@ -79,72 +82,92 @@ public class ViewHelperUtils {
                             .build()))
             .build();
 
-    public static View buildAddVacationInfoView(String channelId) {
+    public static View buildAddVacationInfoView(String channelId, String userId, boolean isAdmin) {
+        List<LayoutBlock> blocks = new ArrayList<>();
+        if (isAdmin) {
+            InputBlock userSelector = InputBlock.builder()
+                    .blockId(VACATION_USER.name())
+                    .optional(false)
+                    .label(PlainTextObject.builder()
+                            .text("Username")
+                            .build())
+                    .element(UsersSelectElement.builder()
+                            .actionId(SET_VACATION_USER.name())
+                            .initialUser(userId)
+                            .placeholder(PlainTextObject.builder()
+                                    .text("Select user")
+                                    .build())
+                            .build())
+                    .build();
+            blocks.add(userSelector);
+        }
+        blocks.addAll(List.of(
+                InputBlock.builder()
+                        .blockId(DATE_FROM.name())
+                        .optional(false)
+                        .label(PlainTextObject.builder()
+                                .text("Date from")
+                                .emoji(true)
+                                .build())
+                        .element(DatePickerElement.builder()
+                                .actionId(SET_FROM.name())
+                                .placeholder(PlainTextObject.builder()
+                                        .text("Select a date")
+                                        .build())
+                                .build())
+                        .build(),
+                InputBlock.builder()
+                        .blockId(DATE_TO.name())
+                        .optional(false)
+                        .label(PlainTextObject.builder()
+                                .text("Date to")
+                                .emoji(true)
+                                .build())
+                        .element(DatePickerElement.builder()
+                                .actionId(SET_TO.name())
+                                .placeholder(PlainTextObject.builder()
+                                        .text("Select a date")
+                                        .build())
+                                .build())
+                        .build(),
+                InputBlock.builder()
+                        .blockId(SUBSTITUTION.name())
+                        .optional(true)
+                        .label(PlainTextObject.builder()
+                                .text("Substitution")
+                                .emoji(true)
+                                .build())
+                        .element(MultiUsersSelectElement.builder()
+                                .actionId(SET_SUBSTITUTION.name())
+                                .placeholder(PlainTextObject.builder()
+                                        .text("Choose your substitution")
+                                        .build())
+                                .build())
+                        .build(),
+                InputBlock.builder()
+                        .blockId(COMMENT.name())
+                        .optional(true)
+                        .label(PlainTextObject.builder()
+                                .text("Comment")
+                                .emoji(true)
+                                .build())
+                        .element(PlainTextInputElement.builder()
+                                .actionId(SET_COMMENT.name())
+                                .maxLength(COMMENT_MAX_LENGTH)
+                                .multiline(true)
+                                .placeholder(PlainTextObject.builder()
+                                        .text("Write down your commentary (512 symbols)")
+                                        .build())
+                                .build())
+                        .build()));
+
         return View.builder()
                 .type("modal")
                 .callbackId(channelId)
                 .title(ViewTitle.builder().type("plain_text").text("New vacation info").build())
                 .submit(ViewSubmit.builder().type("plain_text").text("Submit").build())
                 .notifyOnClose(true)
-                .blocks(List.of(
-                        InputBlock.builder()
-                                .blockId(DATE_FROM.name())
-                                .optional(false)
-                                .label(PlainTextObject.builder()
-                                        .text("Date from")
-                                        .emoji(true)
-                                        .build())
-                                .element(DatePickerElement.builder()
-                                        .actionId(SET_FROM.name())
-                                        .placeholder(PlainTextObject.builder()
-                                                .text("Select a date")
-                                                .build())
-                                        .build())
-                                .build(),
-                        InputBlock.builder()
-                                .blockId(DATE_TO.name())
-                                .optional(false)
-                                .label(PlainTextObject.builder()
-                                        .text("Date to")
-                                        .emoji(true)
-                                        .build())
-                                .element(DatePickerElement.builder()
-                                        .actionId(SET_TO.name())
-                                        .placeholder(PlainTextObject.builder()
-                                                .text("Select a date")
-                                                .build())
-                                        .build())
-                                .build(),
-                        InputBlock.builder()
-                                .blockId(SUBSTITUTION.name())
-                                .optional(true)
-                                .label(PlainTextObject.builder()
-                                        .text("Substitution")
-                                        .emoji(true)
-                                        .build())
-                                .element(MultiUsersSelectElement.builder()
-                                        .actionId(SET_SUBSTITUTION.name())
-                                        .placeholder(PlainTextObject.builder()
-                                                .text("Choose your substitution")
-                                                .build())
-                                        .build())
-                                .build(),
-                        InputBlock.builder()
-                                .blockId(COMMENT.name())
-                                .optional(true)
-                                .label(PlainTextObject.builder()
-                                        .text("Comment")
-                                        .emoji(true)
-                                        .build())
-                                .element(PlainTextInputElement.builder()
-                                        .actionId(SET_COMMENT.name())
-                                        .maxLength(COMMENT_MAX_LENGTH)
-                                        .multiline(true)
-                                        .placeholder(PlainTextObject.builder()
-                                                .text("Write down your commentary (512 symbols)")
-                                                .build())
-                                        .build())
-                                .build()))
+                .blocks(blocks)
                 .build();
     }
 

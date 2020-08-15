@@ -9,4 +9,6 @@ public class ShowVacationInfoRequestDto {
     private String userId;
 
     private String teamId;
+
+    private boolean isAdmin;
 }

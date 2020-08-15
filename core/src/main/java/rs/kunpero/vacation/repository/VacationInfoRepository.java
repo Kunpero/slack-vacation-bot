@@ -13,6 +13,8 @@ import java.util.List;
 public interface VacationInfoRepository extends CrudRepository<VacationInfo, Long> {
     List<VacationInfo> findByUserIdAndTeamId(String userId, String teamId);
 
+    List<VacationInfo> findByTeamId(String teamId);
+
     @Query("from VacationInfo v where v.teamId = :teamId and :date between v.dateFrom and v.dateTo")
     List<VacationInfo> findByTeamIdAndDateBetween(@Param("teamId") String teamId, @Param("date") LocalDate date);
 
