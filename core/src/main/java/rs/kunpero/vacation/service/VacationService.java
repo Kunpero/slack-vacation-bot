@@ -84,8 +84,9 @@ public class VacationService {
     }
 
     public ShowVacationInfoResponseDto showVacationInfo(ShowVacationInfoRequestDto request) {
-        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
-        vacationInfoList.removeIf(v -> v.getDateTo().isBefore(LocalDate.now()));
+        String teamId = request.getTeamId();
+        List<VacationInfo> vacationInfoList = getActualVacationsForUser(request.getUserId(), teamId, request.isAdmin());
+
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoListForUser(vacationInfoList));
     }
@@ -93,7 +94,8 @@ public class VacationService {
     public DeleteVacationInfoResponseDto deleteVacationInfo(DeleteVacationInfoRequestDto request) throws IOException, SlackApiException {
         vacationInfoRepository.deleteById(request.getVacationInfoId());
         log.info("VacationInfo with id [{}] was successfully deleted", request.getVacationInfoId());
-        List<VacationInfo> vacationInfoList = vacationInfoRepository.findByUserIdAndTeamId(request.getUserId(), request.getTeamId());
+        String teamId = request.getTeamId();
+        List<VacationInfo> vacationInfoList = getActualVacationsForUser(request.getUserId(), teamId, request.isAdmin());
 
         notifySelectedChannel(request.getTeamId());
         return new DeleteVacationInfoResponseDto()
@@ -113,6 +115,13 @@ public class VacationService {
 
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
+    }
+
+    private List<VacationInfo> getActualVacationsForUser(String userId, String teamId, boolean isAdmin) {
+        List<VacationInfo> vacationInfoList = isAdmin ? vacationInfoRepository.findByTeamId(teamId)
+                : vacationInfoRepository.findByUserIdAndTeamId(userId, teamId);
+        vacationInfoList.removeIf(v -> v.getDateTo().isBefore(LocalDate.now()));
+        return vacationInfoList;
     }
 
     private void notifySelectedChannel(String teamId) throws IOException, SlackApiException {

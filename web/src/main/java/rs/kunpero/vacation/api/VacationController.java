@@ -21,10 +21,12 @@ import com.slack.api.webhook.WebhookResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import rs.kunpero.vacation.service.VacationAdminService;
 import rs.kunpero.vacation.service.VacationService;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
 import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
@@ -54,12 +56,14 @@ import static rs.kunpero.vacation.util.ActionId.SET_COMMENT;
 import static rs.kunpero.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.ActionId.SET_VACATION_USER;
 import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
 import static rs.kunpero.vacation.util.BlockId.COMMENT;
 import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
 import static rs.kunpero.vacation.util.BlockId.DATE_TO;
 import static rs.kunpero.vacation.util.BlockId.ERROR;
 import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
+import static rs.kunpero.vacation.util.BlockId.VACATION_USER;
 import static rs.kunpero.vacation.util.ViewHelperUtils.START_MENU;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildAddVacationInfoView;
 import static rs.kunpero.vacation.util.ViewHelperUtils.buildChatPostEphemeralRequest;
@@ -77,13 +81,16 @@ public class VacationController {
     private static final String VIEW_SUBMISSION_TYPE = "view_submission";
 
     private final VacationService vacationService;
+    private final VacationAdminService vacationAdminService;
     private final Gson gson;
     private final Slack slack;
     private final ActionResponseSender actionResponseSender;
 
     @Autowired
-    public VacationController(VacationService vacationService, Gson gson, Slack slack, ActionResponseSender actionResponseSender) {
+    public VacationController(VacationService vacationService, VacationAdminService vacationAdminService,
+                              Gson gson, Slack slack, ActionResponseSender actionResponseSender) {
         this.vacationService = vacationService;
+        this.vacationAdminService= vacationAdminService;
         this.gson = gson;
         this.slack = slack;
         this.actionResponseSender = actionResponseSender;
@@ -132,9 +139,11 @@ public class VacationController {
         ActionId actionId = ActionId.safeValueOf(actions.get(0).getActionId());
 
         ActionResponse actionResponse = null;
+        final boolean isAdmin = vacationAdminService.isAdmin(payload.getUser().getId(), payload.getUser().getTeamId());
         if (actionId == ADD_VACATION) {
+
             slack.methods(accessToken).viewsOpen(req -> req
-                    .view(buildAddVacationInfoView(payload.getChannel().getId()))
+                    .view(buildAddVacationInfoView(payload.getChannel().getId(), payload.getUser().getId(), isAdmin))
                     .triggerId(payload.getTriggerId()));
 
             actionResponse = ActionResponse.builder()
@@ -144,7 +153,8 @@ public class VacationController {
         } else if (actionId == SHOW_VACATION) {
             ShowVacationInfoRequestDto requestDto = new ShowVacationInfoRequestDto()
                     .setUserId(payload.getUser().getId())
-                    .setTeamId(payload.getUser().getTeamId());
+                    .setTeamId(payload.getUser().getTeamId())
+                    .setAdmin(isAdmin);
             ShowVacationInfoResponseDto responseDto = vacationService.showVacationInfo(requestDto);
 
             List<LayoutBlock> blocks = buildUserShowVacationBlocks(responseDto.getVacationInfoList());
@@ -157,7 +167,8 @@ public class VacationController {
             DeleteVacationInfoRequestDto requestDto = new DeleteVacationInfoRequestDto()
                     .setVacationInfoId(Long.valueOf(actions.get(0).getValue()))
                     .setUserId(payload.getUser().getId())
-                    .setTeamId(payload.getUser().getTeamId());
+                    .setTeamId(payload.getUser().getTeamId())
+                    .setAdmin(isAdmin);
             DeleteVacationInfoResponseDto responseDto = vacationService.deleteVacationInfo(requestDto);
 
             List<LayoutBlock> blocks = buildUserShowVacationBlocks(responseDto.getVacationInfoList());
@@ -182,8 +193,17 @@ public class VacationController {
     private void handleViewSubmission(String body, HttpServletResponse response) throws IOException, SlackApiException {
         ViewSubmissionPayload payload = gson.fromJson(body, ViewSubmissionPayload.class);
         Map<String, Map<String, ViewState.Value>> valuesMap = payload.getView().getState().getValues();
+
+        Map<String, ViewState.Value> vacationUserMap = valuesMap.get(VACATION_USER.name());
+
+        String userId;
+        if (CollectionUtils.isEmpty(vacationUserMap)) {
+            userId = payload.getUser().getId();
+        } else {
+            userId = vacationUserMap.get(SET_VACATION_USER.name()).getSelectedUser();
+        }
         AddVacationInfoRequestDto requestDto = new AddVacationInfoRequestDto()
-                .setUserId(payload.getUser().getId())
+                .setUserId(userId)
                 .setTeamId(payload.getUser().getTeamId())
                 .setDateFrom(LocalDate.parse(valuesMap.get(DATE_FROM.name()).get(SET_FROM.name()).getSelectedDate()))
                 .setDateTo(LocalDate.parse(valuesMap.get(DATE_TO.name()).get(SET_TO.name()).getSelectedDate()))
@@ -209,7 +229,9 @@ public class VacationController {
                 .text(MarkdownTextObject.builder()
                         .text(errorDescription)
                         .build()).build());
-        View viewWithError = buildAddVacationInfoView(payload.getView().getCallbackId());
+
+        boolean isAdmin = vacationAdminService.isAdmin(payload.getUser().getId(), payload.getUser().getTeamId());
+        View viewWithError = buildAddVacationInfoView(payload.getView().getCallbackId(), payload.getUser().getId(), isAdmin);
         viewWithError.setBlocks(blocks);
         ViewSubmissionResponse submissionResponse = ViewSubmissionResponse.builder()
                 .responseAction("update")

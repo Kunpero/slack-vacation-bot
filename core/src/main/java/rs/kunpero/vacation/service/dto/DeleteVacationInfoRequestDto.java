@@ -11,4 +11,6 @@ public class DeleteVacationInfoRequestDto {
     private String teamId;
 
     private long vacationInfoId;
+
+    private boolean isAdmin;
 }
