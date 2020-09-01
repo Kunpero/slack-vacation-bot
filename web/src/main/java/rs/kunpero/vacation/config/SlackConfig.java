@@ -19,7 +19,7 @@ public class SlackConfig {
 
     @Bean
     public Slack slack() {
-        return new Slack();
+        return Slack.getInstance();
     }
 
     @Bean
