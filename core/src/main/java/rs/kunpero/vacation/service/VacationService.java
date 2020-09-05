@@ -46,17 +46,17 @@ public class VacationService {
     private final VacationInfoRepository vacationInfoRepository;
     private final MessageSourceHelper messageSourceHelper;
     private final MethodsClient methodsClient;
+    private final String accessToken;
 
     @Autowired
     public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper,
-                           Slack slack) {
+                           Slack slack, @Value("${slack.access.token}") String accessToken) {
         this.vacationInfoRepository = vacationInfoRepository;
         this.messageSourceHelper = messageSourceHelper;
         this.methodsClient = slack.methods(accessToken);
+        this.accessToken = accessToken;
     }
 
-    @Value("${slack.access.token}")
-    private String accessToken;
     @Value("${channel.notification.enabled}")
     private boolean channelNotificationEnabled;
     @Value("${notified.channel.id}")

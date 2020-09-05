@@ -86,19 +86,18 @@ public class VacationController {
     private final Gson gson;
     private final MethodsClient methodsClient;
     private final ActionResponseSender actionResponseSender;
+    private final String accessToken;
 
     @Autowired
     public VacationController(VacationService vacationService, VacationAdminService vacationAdminService,
-                              Gson gson, Slack slack, ActionResponseSender actionResponseSender) {
+                              Gson gson, Slack slack, ActionResponseSender actionResponseSender, @Value("${slack.access.token}") String accessToken) {
         this.vacationService = vacationService;
         this.vacationAdminService = vacationAdminService;
         this.gson = gson;
         this.methodsClient = slack.methods(accessToken);
         this.actionResponseSender = actionResponseSender;
+        this.accessToken = accessToken;
     }
-
-    @Value("${slack.access.token}")
-    private String accessToken;
 
     @RequestMapping(value = "/start", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
     public SlashCommandResponse start(HttpServletRequest request) throws IOException {
