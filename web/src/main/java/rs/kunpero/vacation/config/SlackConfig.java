@@ -5,6 +5,7 @@ import com.slack.api.Slack;
 import com.slack.api.app_backend.SlackSignature;
 import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
 import com.slack.api.app_backend.interactive_components.ActionResponseSender;
+import com.slack.api.methods.AsyncMethodsClient;
 import com.slack.api.util.json.GsonFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,9 +18,17 @@ public class SlackConfig {
     @Value("${slack.signing.secret}")
     private String signingSecret;
 
+    @Value("${slack.access.token}")
+    private String accessToken;
+
     @Bean
     public Slack slack() {
         return Slack.getInstance();
+    }
+
+    @Bean
+    public AsyncMethodsClient asyncMethodsClient(Slack slack) {
+        return slack.methodsAsync(accessToken);
     }
 
     @Bean
