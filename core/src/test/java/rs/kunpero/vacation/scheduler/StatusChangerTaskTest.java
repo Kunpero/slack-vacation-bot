@@ -41,7 +41,7 @@ public class StatusChangerTaskTest {
 
         List<VacationInfo> vacationInfos = List.of(new VacationInfo("user0", "team0", fromDate, toDate,
                 "", ""));
-        when(vacationInfoRepository.findByAndDateToGreaterThanEqualAndChangedFalse(any())).thenReturn(vacationInfos);
+        when(vacationInfoRepository.findByDateBetweenAndChangedFalse(any())).thenReturn(vacationInfos);
         when(methodsClient.usersProfileSet(requestArgumentCaptor.capture())).thenReturn(null);
         statusChangerTask.changeUserStatus();
 

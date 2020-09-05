@@ -72,8 +72,9 @@ public class VacationInfoRepositoryTest {
 
     @Test
     public void findByAndDateToGreaterThanEqualAndChangedFalseTest() {
-        final LocalDate date = LocalDate.of(2020, Month.JANUARY, 8);
-        List<VacationInfo> userVacations = vacationInfoRepository.findByAndDateToGreaterThanEqualAndChangedFalse(date);
-        Assert.assertEquals(2, userVacations.size());
+        final LocalDate date = LocalDate.of(2020, Month.FEBRUARY, 8);
+        List<VacationInfo> userVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(date);
+        Assert.assertEquals(1, userVacations.size());
+        Assert.assertEquals(LocalDate.of(2020, Month.FEBRUARY, 13), userVacations.get(0).getDateTo());
     }
 }

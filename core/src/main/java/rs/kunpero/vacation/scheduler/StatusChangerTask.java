@@ -33,7 +33,7 @@ public class StatusChangerTask {
     public void changeUserStatus() {
         log.info("changeUserStatus task started");
 
-        List<VacationInfo> actualVacations = vacationInfoRepository.findByAndDateToGreaterThanEqualAndChangedFalse(LocalDate.now());
+        List<VacationInfo> actualVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(LocalDate.now());
         actualVacations
                 .forEach(info -> {
                     final User.Profile profile = new User.Profile();
