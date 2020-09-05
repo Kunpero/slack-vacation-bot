@@ -20,5 +20,5 @@ public interface VacationInfoRepository extends CrudRepository<VacationInfo, Lon
 
     List<VacationInfo> findByTeamIdAndDateToGreaterThanEqual(String teamId, LocalDate date);
 
-    List<VacationInfo> findByAndDateToGreaterThanEqual(LocalDate date);
+    List<VacationInfo> findByAndDateToGreaterThanEqualAndChangedFalse(LocalDate date);
 }

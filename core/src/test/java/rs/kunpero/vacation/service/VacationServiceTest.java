@@ -89,7 +89,7 @@ public class VacationServiceTest {
         final String comment = "Comment";
 
         var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
-                comment);
+                comment,  false);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
@@ -113,7 +113,7 @@ public class VacationServiceTest {
         final String comment = "A".repeat(COMMENT_MAX_LENGTH + 1);
 
         var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
-                comment);
+                comment, false);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
