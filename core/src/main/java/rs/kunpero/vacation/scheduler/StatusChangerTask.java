@@ -12,6 +12,7 @@ import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -39,7 +40,7 @@ public class StatusChangerTask {
                     final User.Profile profile = new User.Profile();
                     profile.setStatusEmoji(":palm_tree:");
                     profile.setStatusText(String.format("On vacation until %s", info.getDateTo().toString()));
-                    profile.setStatusExpiration(info.getDateTo().plusDays(1).toEpochDay());
+                    profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
                     UsersProfileSetRequest request = UsersProfileSetRequest.builder()
                             .token(accessToken)
                             .name(info.getUserId())
@@ -47,7 +48,7 @@ public class StatusChangerTask {
                             .build();
                     methodsClient.usersProfileSet(request);
                     info.setChanged(true);
-                    log.debug("Status for user [{}] was updated", info.getUserId());
+                    log.info("Status with id [{}] for user [{}] was updated", info.getId(), info.getUserId());
                 });
         vacationInfoRepository.saveAll(actualVacations);
     }
