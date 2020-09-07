@@ -46,9 +46,12 @@ you need to directly insert specified rows into `VACATION_ADMIN` table. E.g.:
 
 <h3>Vacation info in user's status feature</h3>
 Every day at 12 A.M. actual vacation info is set to connected user's status:
-![Alt text](img/charlie1.png?raw=true)<br>
+
+![Alt text](img/charlie1.png?raw=true)
+
 As you can see, a little palm next to the username is shown,
 so you can be aware if user is on vacation or not.
 ![Alt text](img/charlie2.png?raw=true)
+
 Also, this status expires at 12 A.M. on the next day after the last vacation day.<br>
 FYI: This feature is based on your server's system timezone.
