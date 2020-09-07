@@ -16,6 +16,7 @@ import rs.kunpero.vacation.repository.VacationInfoRepository;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +47,7 @@ public class StatusChangerTaskTest {
         statusChangerTask.changeUserStatus();
 
         UsersProfileSetRequest value = requestArgumentCaptor.getValue();
-        Assert.assertEquals((long) value.getProfile().getStatusExpiration(), vacationInfos.get(0).getDateTo().plusDays(1).toEpochDay());
+        Assert.assertEquals((long) value.getProfile().getStatusExpiration(), vacationInfos.get(0).getDateTo().plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
     }
 }

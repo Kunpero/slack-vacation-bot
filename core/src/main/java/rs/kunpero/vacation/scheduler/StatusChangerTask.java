@@ -47,7 +47,7 @@ public class StatusChangerTask {
                             .profile(profile)
                             .build();
                     methodsClient.usersProfileSet(request);
-                    info.setChanged(true);
+                    info.setStatusChanged(true);
                     log.info("Status with id [{}] for user [{}] was updated", info.getId(), info.getUserId());
                 });
         vacationInfoRepository.saveAll(actualVacations);

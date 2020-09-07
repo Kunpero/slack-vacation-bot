@@ -42,8 +42,8 @@ public class VacationInfo {
     @Column(name = "COMMENT")
     private String comment;
 
-    @Column(name = "IS_CHANGED")
-    private boolean changed;
+    @Column(name = "IS_STATUS_CHANGED")
+    private boolean statusChanged;
 
     public VacationInfo(String userId, String teamId, LocalDate dateFrom, LocalDate dateTo, String substitutionUserIds,
                         String comment) {
