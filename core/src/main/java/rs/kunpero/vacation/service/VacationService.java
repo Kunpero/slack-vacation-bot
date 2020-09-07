@@ -1,6 +1,7 @@
 package rs.kunpero.vacation.service;
 
 import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -44,18 +45,18 @@ public class VacationService {
 
     private final VacationInfoRepository vacationInfoRepository;
     private final MessageSourceHelper messageSourceHelper;
-    private final Slack slack;
+    private final MethodsClient methodsClient;
+    private final String accessToken;
 
     @Autowired
     public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper,
-                           Slack slack) {
+                           Slack slack, @Value("${slack.access.token}") String accessToken) {
         this.vacationInfoRepository = vacationInfoRepository;
         this.messageSourceHelper = messageSourceHelper;
-        this.slack = slack;
+        this.methodsClient = slack.methods(accessToken);
+        this.accessToken = accessToken;
     }
 
-    @Value("${slack.access.token}")
-    private String accessToken;
     @Value("${channel.notification.enabled}")
     private boolean channelNotificationEnabled;
     @Value("${notified.channel.id}")
@@ -133,7 +134,7 @@ public class VacationService {
             LOCK.lock();
             LocalDate date = LocalDate.now();
             List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateToGreaterThanEqual(teamId, date);
-            ChatPostMessageResponse response = slack.methods(accessToken)
+            ChatPostMessageResponse response = methodsClient
                     .chatPostMessage(buildChatPostRequest(accessToken, channelId, buildVacationInfoDtoList(vacationInfoList)));
             log.debug(response.toString());
         } finally {

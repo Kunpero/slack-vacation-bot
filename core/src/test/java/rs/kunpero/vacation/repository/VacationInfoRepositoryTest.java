@@ -35,7 +35,8 @@ public class VacationInfoRepositoryTest {
                 LocalDate.of(2018, Month.JUNE, 16),
                 LocalDate.of(2018, Month.JUNE, 18),
                 substitution,
-                comment);
+                comment,
+                false);
         Assert.assertEquals(expectedVacation, actualVacation);
     }
 
@@ -67,5 +68,13 @@ public class VacationInfoRepositoryTest {
         final LocalDate date = LocalDate.of(2019, Month.JANUARY, 8);
         List<VacationInfo> userVacations = vacationInfoRepository.findByTeamIdAndDateToGreaterThanEqual(teamId, date);
         Assert.assertEquals(3, userVacations.size());
+    }
+
+    @Test
+    public void findByAndDateToGreaterThanEqualAndChangedFalseTest() {
+        final LocalDate date = LocalDate.of(2020, Month.FEBRUARY, 8);
+        List<VacationInfo> userVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(date);
+        Assert.assertEquals(1, userVacations.size());
+        Assert.assertEquals(LocalDate.of(2020, Month.FEBRUARY, 13), userVacations.get(0).getDateTo());
     }
 }

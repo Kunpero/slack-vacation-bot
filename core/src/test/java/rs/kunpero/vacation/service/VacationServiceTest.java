@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.StringUtils;
 import rs.kunpero.vacation.config.TestConfig;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
@@ -89,7 +88,7 @@ public class VacationServiceTest {
         final String comment = "Comment";
 
         var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
-                comment);
+                comment, false);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
@@ -113,7 +112,7 @@ public class VacationServiceTest {
         final String comment = "A".repeat(COMMENT_MAX_LENGTH + 1);
 
         var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
-                comment);
+                comment, false);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
@@ -125,6 +124,6 @@ public class VacationServiceTest {
                 .setComment(comment);
         var response = vacationService.addVacationInfo(request);
         Assert.assertEquals(3, response.getErrorCode());
-        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.interfere.error.message")+ "\n" + wrapIntoInlineMarkdown("vacation.comment.length.exceeded.message"), response.getErrorDescription());
+        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.interfere.error.message") + "\n" + wrapIntoInlineMarkdown("vacation.comment.length.exceeded.message"), response.getErrorDescription());
     }
 }
