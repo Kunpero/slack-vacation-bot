@@ -6,6 +6,7 @@ with next parameters:
 * Date from [mandatory]
 * Date to [mandatory]
 * Substitution users [optional]
+* Comment [optional]
 
 You can't add vacations with crossing dates.
   
