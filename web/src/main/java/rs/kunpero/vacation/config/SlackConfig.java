@@ -6,6 +6,7 @@ import com.slack.api.app_backend.SlackSignature;
 import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
 import com.slack.api.app_backend.interactive_components.ActionResponseSender;
 import com.slack.api.methods.AsyncMethodsClient;
+import com.slack.api.methods.MethodsClient;
 import com.slack.api.util.json.GsonFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,11 @@ public class SlackConfig {
     @Bean
     public AsyncMethodsClient asyncMethodsClient(Slack slack) {
         return slack.methodsAsync(accessToken);
+    }
+
+    @Bean
+    public MethodsClient methodsClient() {
+        return slack().methods(accessToken);
     }
 
     @Bean

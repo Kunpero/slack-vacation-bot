@@ -1,7 +1,10 @@
 package rs.kunpero.vacation.scheduler;
 
 import com.slack.api.methods.AsyncMethodsClient;
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.users.profile.UsersProfileSetRequest;
+import com.slack.api.methods.response.users.profile.UsersProfileSetResponse;
 import com.slack.api.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Component;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -19,13 +23,13 @@ import java.util.List;
 @Slf4j
 public class StatusChangerTask {
 
-    private final AsyncMethodsClient methodsClient;
+    private final MethodsClient methodsClient;
     private final VacationInfoRepository vacationInfoRepository;
     private final String accessToken;
 
     @Autowired
-    public StatusChangerTask(AsyncMethodsClient asyncMethodsClient, VacationInfoRepository vacationInfoRepository, @Value("${slack.access.token}") String accessToken) {
-        this.methodsClient = asyncMethodsClient;
+    public StatusChangerTask(MethodsClient methodsClient, VacationInfoRepository vacationInfoRepository, @Value("${slack.access.token}") String accessToken) {
+        this.methodsClient = methodsClient;
         this.vacationInfoRepository = vacationInfoRepository;
         this.accessToken = accessToken;
     }
@@ -49,7 +53,12 @@ public class StatusChangerTask {
                             .user(info.getUserId())
                             .profile(profile)
                             .build();
-                    methodsClient.usersProfileSet(request);
+                    try {
+                        UsersProfileSetResponse response = methodsClient.usersProfileSet(request);
+                        log.info(response.toString());
+                    } catch (IOException | SlackApiException e) {
+                        e.printStackTrace();
+                    }
                     info.setStatusChanged(true);
                     log.info("Status with id [{}] for user [{}] was updated", info.getId(), info.getUserId());
                 });
