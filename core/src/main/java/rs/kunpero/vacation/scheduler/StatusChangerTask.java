@@ -37,7 +37,7 @@ public class StatusChangerTask {
 
         List<VacationInfo> actualVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(LocalDate.now());
         ZoneId zoneId = ZoneId.systemDefault();
-        log.debug("System time zone: [{}]", zoneId);
+        log.info("System time zone: [{}]", zoneId);
         actualVacations
                 .forEach(info -> {
                     final User.Profile profile = new User.Profile();
