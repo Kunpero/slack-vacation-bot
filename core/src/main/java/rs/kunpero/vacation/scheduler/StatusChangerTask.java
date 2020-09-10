@@ -30,17 +30,20 @@ public class StatusChangerTask {
         this.accessToken = accessToken;
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    //    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 * * ? * *")
     public void changeUserStatus() {
         log.info("changeUserStatus task started");
 
         List<VacationInfo> actualVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(LocalDate.now());
+        ZoneId zoneId = ZoneId.systemDefault();
+        log.debug("System time zone: [{}]", zoneId);
         actualVacations
                 .forEach(info -> {
                     final User.Profile profile = new User.Profile();
                     profile.setStatusEmoji(":palm_tree:");
                     profile.setStatusText(String.format("On vacation until %s", info.getDateTo().toString()));
-                    profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
+                    profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(zoneId).toEpochSecond());
                     UsersProfileSetRequest request = UsersProfileSetRequest.builder()
                             .token(accessToken)
                             .name(info.getUserId())
