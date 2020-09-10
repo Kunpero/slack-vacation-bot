@@ -42,26 +42,25 @@ public class StatusChangerTask {
         List<VacationInfo> actualVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(LocalDate.now());
         ZoneId zoneId = ZoneId.systemDefault();
         log.info("System time zone: [{}]", zoneId);
-        actualVacations
-                .forEach(info -> {
-                    final User.Profile profile = new User.Profile();
-                    profile.setStatusEmoji(":palm_tree:");
-                    profile.setStatusText(String.format("On vacation until %s", info.getDateTo().toString()));
-                    profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(zoneId).toEpochSecond());
-                    UsersProfileSetRequest request = UsersProfileSetRequest.builder()
-                            .token(accessToken)
-                            .user(info.getUserId())
-                            .profile(profile)
-                            .build();
-                    try {
-                        UsersProfileSetResponse response = methodsClient.usersProfileSet(request);
-                        log.info(response.toString());
-                    } catch (IOException | SlackApiException e) {
-                        e.printStackTrace();
-                    }
-                    info.setStatusChanged(true);
-                    log.info("Status with id [{}] for user [{}] was updated", info.getId(), info.getUserId());
-                });
+        for (VacationInfo info : actualVacations) {
+            final User.Profile profile = new User.Profile();
+            profile.setStatusEmoji(":palm_tree:");
+            profile.setStatusText(String.format("On vacation until %s", info.getDateTo().toString()));
+            profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(zoneId).toEpochSecond());
+            UsersProfileSetRequest request = UsersProfileSetRequest.builder()
+                    .token(accessToken)
+                    .user(info.getUserId())
+                    .profile(profile)
+                    .build();
+            try {
+                UsersProfileSetResponse response = methodsClient.usersProfileSet(request);
+                log.info(response.toString());
+            } catch (IOException | SlackApiException e) {
+                e.printStackTrace();
+            }
+            info.setStatusChanged(true);
+            log.info("Status with id [{}] for user [{}] was updated", info.getId(), info.getUserId());
+        }
         vacationInfoRepository.saveAll(actualVacations);
     }
 }
