@@ -46,7 +46,7 @@ public class StatusChangerTask {
                     profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(zoneId).toEpochSecond());
                     UsersProfileSetRequest request = UsersProfileSetRequest.builder()
                             .token(accessToken)
-                            .name(info.getUserId())
+                            .user(info.getUserId())
                             .profile(profile)
                             .build();
                     methodsClient.usersProfileSet(request);
