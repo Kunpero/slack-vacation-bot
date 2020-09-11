@@ -21,6 +21,7 @@ import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ public class VacationServiceTest {
 
     @MockBean
     private VacationInfoRepository vacationInfoRepository;
+    @MockBean UserStatusService userStatusService;
     @Autowired
     private VacationService vacationService;
 
@@ -52,10 +54,12 @@ public class VacationServiceTest {
                 .setDateTo(to)
                 .setSubstitutionIdList(substitutionUserIds);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
-        ArgumentCaptor<VacationInfo> vacationInfoArgumentCaptor = ArgumentCaptor.forClass(VacationInfo.class);
+        ArgumentCaptor<VacationInfo> vacationInfoArgumentCaptor1 = ArgumentCaptor.forClass(VacationInfo.class);
+
         var response = vacationService.addVacationInfo(request);
-        verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor.capture());
-        Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor.getValue().getSubstitutionUserIds());
+        verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor1.capture());
+        verify(userStatusService, times(0)).changeUserStatus(any());
+        Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor1.getValue().getSubstitutionUserIds());
         Assert.assertEquals(0, response.getErrorCode());
         Assert.assertEquals(wrapIntoInlineMarkdown("add.vacation.success.message"), response.getErrorDescription());
     }
