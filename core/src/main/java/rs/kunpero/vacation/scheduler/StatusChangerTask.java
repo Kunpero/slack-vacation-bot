@@ -1,66 +1,35 @@
 package rs.kunpero.vacation.scheduler;
 
-import com.slack.api.methods.AsyncMethodsClient;
-import com.slack.api.methods.MethodsClient;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.request.users.profile.UsersProfileSetRequest;
-import com.slack.api.methods.response.users.profile.UsersProfileSetResponse;
-import com.slack.api.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
+import rs.kunpero.vacation.service.UserStatusService;
 
-import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 @Component
 @Slf4j
 public class StatusChangerTask {
-
-    private final MethodsClient methodsClient;
     private final VacationInfoRepository vacationInfoRepository;
-    private final String accessToken;
+    private final UserStatusService userStatusService;
 
     @Autowired
-    public StatusChangerTask(MethodsClient methodsClient, VacationInfoRepository vacationInfoRepository, @Value("${slack.access.token}") String accessToken) {
-        this.methodsClient = methodsClient;
+    public StatusChangerTask(VacationInfoRepository vacationInfoRepository, UserStatusService userStatusService) {
         this.vacationInfoRepository = vacationInfoRepository;
-        this.accessToken = accessToken;
+        this.userStatusService = userStatusService;
     }
 
-    //    @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron = "0 * * ? * *")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void changeUserStatus() {
         log.info("changeUserStatus task started");
 
         List<VacationInfo> actualVacations = vacationInfoRepository.findByDateBetweenAndChangedFalse(LocalDate.now());
-        ZoneId zoneId = ZoneId.systemDefault();
-        log.info("System time zone: [{}]", zoneId);
         for (VacationInfo info : actualVacations) {
-            final User.Profile profile = new User.Profile();
-            profile.setStatusEmoji(":palm_tree:");
-            profile.setStatusText(String.format("On vacation until %s", info.getDateTo().toString()));
-            profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(zoneId).toEpochSecond());
-            UsersProfileSetRequest request = UsersProfileSetRequest.builder()
-                    .token(accessToken)
-                    .user(info.getUserId())
-                    .profile(profile)
-                    .build();
-            try {
-                UsersProfileSetResponse response = methodsClient.usersProfileSet(request);
-                log.info(response.toString());
-            } catch (IOException | SlackApiException e) {
-                e.printStackTrace();
-            }
-            info.setStatusChanged(true);
-            log.info("Status with id [{}] for user [{}] was updated", info.getId(), info.getUserId());
+            userStatusService.changeUserStatus(info);
         }
-        vacationInfoRepository.saveAll(actualVacations);
     }
 }

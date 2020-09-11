@@ -45,13 +45,15 @@ public class VacationService {
 
     private final VacationInfoRepository vacationInfoRepository;
     private final MessageSourceHelper messageSourceHelper;
+    private final UserStatusService userStatusService;
     private final MethodsClient methodsClient;
     private final String accessToken;
 
     @Autowired
     public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper,
-                           Slack slack, @Value("${slack.access.token}") String accessToken) {
+                           UserStatusService userStatusService, Slack slack, @Value("${slack.access.token}") String accessToken) {
         this.vacationInfoRepository = vacationInfoRepository;
+        this.userStatusService = userStatusService;
         this.messageSourceHelper = messageSourceHelper;
         this.methodsClient = slack.methods(accessToken);
         this.accessToken = accessToken;
@@ -81,6 +83,7 @@ public class VacationService {
         log.info("VacationInfo was saved successfully");
 
         notifySelectedChannel(request.getTeamId());
+        changeUserStatus(vacationInfo);
         return buildResponse(Collections.singletonList("add.vacation.success"));
     }
 
@@ -116,6 +119,13 @@ public class VacationService {
 
         return new ShowVacationInfoResponseDto()
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
+    }
+
+    private void changeUserStatus(VacationInfo info) {
+        LocalDate now = LocalDate.now();
+        if (now.isAfter(info.getDateFrom()) && now.isBefore(info.getDateTo())) {
+            userStatusService.changeUserStatus(info);
+        }
     }
 
     private List<VacationInfo> getActualVacationsForUser(String userId, String teamId, boolean isAdmin) {
