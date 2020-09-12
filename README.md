@@ -56,4 +56,5 @@ so you can be aware if user is on vacation or not.
 ![Alt text](img/charlie2.png?raw=true)
 
 Also, this status expires at 12 A.M. on the next day after the last vacation day.<br>
-FYI: This feature is based on your server's system timezone.
+FYI: This feature is based on your server's system timezone and only available for admins
+on paid plans :C
