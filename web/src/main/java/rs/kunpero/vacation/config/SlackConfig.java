@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
+import java.time.Clock;
+
 @Configuration
 public class SlackConfig {
 
@@ -67,5 +69,10 @@ public class SlackConfig {
     @Bean
     public ActionResponseSender actionResponseSender(Slack slack) {
         return new ActionResponseSender(slack);
+    }
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
     }
 }

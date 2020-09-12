@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static rs.kunpero.vacation.config.TestConfig.NOW;
 import static rs.kunpero.vacation.service.VacationService.COMMENT_MAX_LENGTH;
 import static rs.kunpero.vacation.util.VacationUtils.wrapIntoInlineMarkdown;
 
@@ -35,7 +36,8 @@ public class VacationServiceTest {
 
     @MockBean
     private VacationInfoRepository vacationInfoRepository;
-    @MockBean UserStatusService userStatusService;
+    @MockBean
+    private UserStatusService userStatusService;
     @Autowired
     private VacationService vacationService;
 
@@ -62,6 +64,82 @@ public class VacationServiceTest {
         Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor1.getValue().getSubstitutionUserIds());
         Assert.assertEquals(0, response.getErrorCode());
         Assert.assertEquals(wrapIntoInlineMarkdown("add.vacation.success.message"), response.getErrorDescription());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusDateFromEqualsNow() throws IOException, SlackApiException {
+        var userId = "USER0";
+        var teamId = "TEAM0";
+        var from = NOW;
+        var to = from.plusDays(1);
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusDayFromBeforeNow() throws IOException, SlackApiException {
+        var userId = "USER1";
+        var teamId = "TEAM1";
+        var from = NOW.minusDays(1);
+        var to = from.plusDays(1);
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusDayToEqualsNow() throws IOException, SlackApiException {
+        var userId = "USER1";
+        var teamId = "TEAM1";
+        var from = NOW.minusDays(1);
+        var to = NOW;
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusOneDayVacation() throws IOException, SlackApiException {
+        var userId = "USER2";
+        var teamId = "TEAM2";
+        var from = NOW;
+        var to = from;
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
     }
 
     @Test

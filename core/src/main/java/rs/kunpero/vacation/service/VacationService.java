@@ -20,6 +20,7 @@ import rs.kunpero.vacation.service.dto.VacationInfoDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,12 +49,14 @@ public class VacationService {
     private final UserStatusService userStatusService;
     private final MethodsClient methodsClient;
     private final String accessToken;
+    private final Clock clock;
 
     @Autowired
-    public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper,
+    public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper, Clock clock,
                            UserStatusService userStatusService, Slack slack, @Value("${slack.access.token}") String accessToken) {
         this.vacationInfoRepository = vacationInfoRepository;
         this.userStatusService = userStatusService;
+        this.clock = clock;
         this.messageSourceHelper = messageSourceHelper;
         this.methodsClient = slack.methods(accessToken);
         this.accessToken = accessToken;
@@ -122,8 +125,9 @@ public class VacationService {
     }
 
     private void changeUserStatus(VacationInfo info) {
-        LocalDate now = LocalDate.now();
-        if (now.isAfter(info.getDateFrom()) && now.isBefore(info.getDateTo())) {
+        LocalDate now = LocalDate.now(clock);
+        if ((now.isAfter(info.getDateFrom()) || now.isEqual(info.getDateFrom()))
+                && (now.isBefore(info.getDateTo()) || now.isEqual(info.getDateTo()))) {
             userStatusService.changeUserStatus(info);
         }
     }
