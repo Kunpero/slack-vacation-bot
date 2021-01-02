@@ -1,7 +1,6 @@
 package rs.kunpero.vacation.api;
 
 import com.google.gson.Gson;
-import com.slack.api.Slack;
 import com.slack.api.app_backend.dialogs.payload.PayloadTypeDetector;
 import com.slack.api.app_backend.interactive_components.ActionResponseSender;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
@@ -29,7 +28,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import rs.kunpero.vacation.service.VacationAdminService;
 import rs.kunpero.vacation.service.VacationService;
-import rs.kunpero.vacation.service.dto.*;
+import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.AddVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.DeleteVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.DeleteVacationInfoResponseDto;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoRequestDto;
+import rs.kunpero.vacation.service.dto.ShowVacationInfoResponseDto;
 import rs.kunpero.vacation.util.ActionId;
 import rs.kunpero.vacation.util.BlockId;
 
@@ -45,9 +49,26 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static rs.kunpero.vacation.util.ActionId.*;
-import static rs.kunpero.vacation.util.BlockId.*;
-import static rs.kunpero.vacation.util.ViewHelperUtils.*;
+import static rs.kunpero.vacation.util.ActionId.ADD_VACATION;
+import static rs.kunpero.vacation.util.ActionId.CLOSE_DIALOG;
+import static rs.kunpero.vacation.util.ActionId.DELETE_VACATION;
+import static rs.kunpero.vacation.util.ActionId.SET_COMMENT;
+import static rs.kunpero.vacation.util.ActionId.SET_FROM;
+import static rs.kunpero.vacation.util.ActionId.SET_SUBSTITUTION;
+import static rs.kunpero.vacation.util.ActionId.SET_TO;
+import static rs.kunpero.vacation.util.ActionId.SET_VACATION_USER;
+import static rs.kunpero.vacation.util.ActionId.SHOW_VACATION;
+import static rs.kunpero.vacation.util.BlockId.COMMENT;
+import static rs.kunpero.vacation.util.BlockId.DATE_FROM;
+import static rs.kunpero.vacation.util.BlockId.DATE_TO;
+import static rs.kunpero.vacation.util.BlockId.ERROR;
+import static rs.kunpero.vacation.util.BlockId.SUBSTITUTION;
+import static rs.kunpero.vacation.util.BlockId.VACATION_USER;
+import static rs.kunpero.vacation.util.ViewHelperUtils.START_MENU;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildAddVacationInfoView;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildChatPostEphemeralRequest;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildUserShowVacationBlocks;
+import static rs.kunpero.vacation.util.ViewHelperUtils.buildVacationInfoView;
 
 @RestController
 @Slf4j
@@ -65,18 +86,9 @@ public class VacationController {
     private final Gson gson;
     private final MethodsClient methodsClient;
     private final ActionResponseSender actionResponseSender;
-    private final String accessToken;
 
-    @Autowired
-    public VacationController(VacationService vacationService, VacationAdminService vacationAdminService,
-                              Gson gson, Slack slack, ActionResponseSender actionResponseSender, @Value("${slack.access.token}") String accessToken) {
-        this.vacationService = vacationService;
-        this.vacationAdminService = vacationAdminService;
-        this.gson = gson;
-        this.methodsClient = slack.methods(accessToken);
-        this.actionResponseSender = actionResponseSender;
-        this.accessToken = accessToken;
-    }
+    @Value("${slack.access.token}")
+    private final String accessToken;
 
     @RequestMapping(value = "/start", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
     public SlashCommandResponse start(HttpServletRequest request) throws IOException {

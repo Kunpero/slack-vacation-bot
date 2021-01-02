@@ -2,6 +2,7 @@ package rs.kunpero.vacation.config.filter;
 
 import com.slack.api.app_backend.SlackSignature;
 import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.GenericFilterBean;
@@ -18,13 +19,10 @@ import java.util.stream.Collectors;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 @Slf4j
+@RequiredArgsConstructor
 public class SlackRequestVerifierFilter extends GenericFilterBean {
-    private final SlackSignatureVerifier slackSignatureVerifier;
 
-    @Autowired
-    public SlackRequestVerifierFilter(SlackSignatureVerifier slackSignatureVerifier) {
-        this.slackSignatureVerifier = slackSignatureVerifier;
-    }
+    private final SlackSignatureVerifier slackSignatureVerifier;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
