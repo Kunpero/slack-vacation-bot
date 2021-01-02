@@ -1,6 +1,7 @@
 package rs.kunpero.vacation.service;
 
 import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import rs.kunpero.vacation.service.dto.VacationInfoDto;
 import rs.kunpero.vacation.util.MessageSourceHelper;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,18 +46,22 @@ public class VacationService {
 
     private final VacationInfoRepository vacationInfoRepository;
     private final MessageSourceHelper messageSourceHelper;
-    private final Slack slack;
+    private final UserStatusService userStatusService;
+    private final MethodsClient methodsClient;
+    private final String accessToken;
+    private final Clock clock;
 
     @Autowired
-    public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper,
-                           Slack slack) {
+    public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper, Clock clock,
+                           UserStatusService userStatusService, Slack slack, @Value("${slack.access.token}") String accessToken) {
         this.vacationInfoRepository = vacationInfoRepository;
+        this.userStatusService = userStatusService;
+        this.clock = clock;
         this.messageSourceHelper = messageSourceHelper;
-        this.slack = slack;
+        this.methodsClient = slack.methods(accessToken);
+        this.accessToken = accessToken;
     }
 
-    @Value("${slack.access.token}")
-    private String accessToken;
     @Value("${channel.notification.enabled}")
     private boolean channelNotificationEnabled;
     @Value("${notified.channel.id}")
@@ -80,6 +86,7 @@ public class VacationService {
         log.info("VacationInfo was saved successfully");
 
         notifySelectedChannel(request.getTeamId());
+        changeUserStatus(vacationInfo);
         return buildResponse(Collections.singletonList("add.vacation.success"));
     }
 
@@ -117,6 +124,14 @@ public class VacationService {
                 .setVacationInfoList(buildVacationInfoDtoList(vacationInfoList));
     }
 
+    private void changeUserStatus(VacationInfo info) {
+        LocalDate now = LocalDate.now(clock);
+        if ((now.isAfter(info.getDateFrom()) || now.isEqual(info.getDateFrom()))
+                && (now.isBefore(info.getDateTo()) || now.isEqual(info.getDateTo()))) {
+            userStatusService.changeUserStatus(info);
+        }
+    }
+
     private List<VacationInfo> getActualVacationsForUser(String userId, String teamId, boolean isAdmin) {
         List<VacationInfo> vacationInfoList = isAdmin ? vacationInfoRepository.findByTeamId(teamId)
                 : vacationInfoRepository.findByUserIdAndTeamId(userId, teamId);
@@ -133,7 +148,7 @@ public class VacationService {
             LOCK.lock();
             LocalDate date = LocalDate.now();
             List<VacationInfo> vacationInfoList = vacationInfoRepository.findByTeamIdAndDateToGreaterThanEqual(teamId, date);
-            ChatPostMessageResponse response = slack.methods(accessToken)
+            ChatPostMessageResponse response = methodsClient
                     .chatPostMessage(buildChatPostRequest(accessToken, channelId, buildVacationInfoDtoList(vacationInfoList)));
             log.debug(response.toString());
         } finally {

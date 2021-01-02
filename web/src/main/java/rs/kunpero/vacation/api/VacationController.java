@@ -11,6 +11,7 @@ import com.slack.api.app_backend.slash_commands.payload.SlashCommandPayload;
 import com.slack.api.app_backend.slash_commands.response.SlashCommandResponse;
 import com.slack.api.app_backend.views.payload.ViewSubmissionPayload;
 import com.slack.api.app_backend.views.response.ViewSubmissionResponse;
+import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.block.SectionBlock;
@@ -62,11 +63,20 @@ public class VacationController {
     private final VacationService vacationService;
     private final VacationAdminService vacationAdminService;
     private final Gson gson;
-    private final Slack slack;
+    private final MethodsClient methodsClient;
     private final ActionResponseSender actionResponseSender;
+    private final String accessToken;
 
-    @Value("${slack.access.token}")
-    private String accessToken;
+    @Autowired
+    public VacationController(VacationService vacationService, VacationAdminService vacationAdminService,
+                              Gson gson, Slack slack, ActionResponseSender actionResponseSender, @Value("${slack.access.token}") String accessToken) {
+        this.vacationService = vacationService;
+        this.vacationAdminService = vacationAdminService;
+        this.gson = gson;
+        this.methodsClient = slack.methods(accessToken);
+        this.actionResponseSender = actionResponseSender;
+        this.accessToken = accessToken;
+    }
 
     @RequestMapping(value = "/start", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
     public SlashCommandResponse start(HttpServletRequest request) throws IOException {
@@ -111,7 +121,7 @@ public class VacationController {
         final boolean isAdmin = vacationAdminService.isAdmin(payload.getUser().getId(), payload.getUser().getTeamId());
         if (actionId == ADD_VACATION) {
 
-            slack.methods(accessToken).viewsOpen(req -> req
+            methodsClient.viewsOpen(req -> req
                     .view(buildAddVacationInfoView(payload.getChannel().getId(), payload.getUser().getId(), isAdmin))
                     .triggerId(payload.getTriggerId()));
 
@@ -181,7 +191,7 @@ public class VacationController {
         AddVacationInfoResponseDto responseDto = vacationService.addVacationInfo(requestDto);
 
         if (responseDto.isSuccessful()) {
-            slack.methods(accessToken)
+            methodsClient
                     .chatPostEphemeral(buildChatPostEphemeralRequest(payload.getUser().getId(), accessToken, payload.getView().getCallbackId()));
             return;
         }

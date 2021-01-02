@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.StringUtils;
 import rs.kunpero.vacation.config.TestConfig;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
@@ -22,10 +21,12 @@ import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static rs.kunpero.vacation.config.TestConfig.NOW;
 import static rs.kunpero.vacation.service.VacationService.COMMENT_MAX_LENGTH;
 import static rs.kunpero.vacation.util.VacationUtils.wrapIntoInlineMarkdown;
 
@@ -35,6 +36,8 @@ public class VacationServiceTest {
 
     @MockBean
     private VacationInfoRepository vacationInfoRepository;
+    @MockBean
+    private UserStatusService userStatusService;
     @Autowired
     private VacationService vacationService;
 
@@ -53,12 +56,90 @@ public class VacationServiceTest {
                 .setDateTo(to)
                 .setSubstitutionIdList(substitutionUserIds);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
-        ArgumentCaptor<VacationInfo> vacationInfoArgumentCaptor = ArgumentCaptor.forClass(VacationInfo.class);
+        ArgumentCaptor<VacationInfo> vacationInfoArgumentCaptor1 = ArgumentCaptor.forClass(VacationInfo.class);
+
         var response = vacationService.addVacationInfo(request);
-        verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor.capture());
-        Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor.getValue().getSubstitutionUserIds());
+        verify(vacationInfoRepository, times(1)).save(vacationInfoArgumentCaptor1.capture());
+        verify(userStatusService, times(0)).changeUserStatus(any());
+        Assert.assertEquals("USER1,USER2", vacationInfoArgumentCaptor1.getValue().getSubstitutionUserIds());
         Assert.assertEquals(0, response.getErrorCode());
         Assert.assertEquals(wrapIntoInlineMarkdown("add.vacation.success.message"), response.getErrorDescription());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusDateFromEqualsNow() throws IOException, SlackApiException {
+        var userId = "USER0";
+        var teamId = "TEAM0";
+        var from = NOW;
+        var to = from.plusDays(1);
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusDayFromBeforeNow() throws IOException, SlackApiException {
+        var userId = "USER1";
+        var teamId = "TEAM1";
+        var from = NOW.minusDays(1);
+        var to = from.plusDays(1);
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusDayToEqualsNow() throws IOException, SlackApiException {
+        var userId = "USER1";
+        var teamId = "TEAM1";
+        var from = NOW.minusDays(1);
+        var to = NOW;
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
+    }
+
+    @Test
+    public void successfulAddOperationTestWithChangeStatusOneDayVacation() throws IOException, SlackApiException {
+        var userId = "USER2";
+        var teamId = "TEAM2";
+        var from = NOW;
+        var to = from;
+
+        var request = new AddVacationInfoRequestDto()
+                .setUserId(userId)
+                .setTeamId(teamId)
+                .setDateFrom(from)
+                .setDateTo(to);
+        when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        vacationService.addVacationInfo(request);
+        verify(vacationInfoRepository, times(1)).save(any());
+        verify(userStatusService, times(1)).changeUserStatus(any());
     }
 
     @Test
@@ -89,7 +170,7 @@ public class VacationServiceTest {
         final String comment = "Comment";
 
         var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
-                comment);
+                comment, false);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
@@ -113,7 +194,7 @@ public class VacationServiceTest {
         final String comment = "A".repeat(COMMENT_MAX_LENGTH + 1);
 
         var interferedVacation = new VacationInfo(0L, teamId, userId, from.plusDays(1), to.plusDays(1), "USER1,USER2",
-                comment);
+                comment, false);
         when(vacationInfoRepository.findByUserIdAndTeamId(anyString(), anyString())).thenReturn(List.of(interferedVacation));
 
         var request = new AddVacationInfoRequestDto()
@@ -125,6 +206,6 @@ public class VacationServiceTest {
                 .setComment(comment);
         var response = vacationService.addVacationInfo(request);
         Assert.assertEquals(3, response.getErrorCode());
-        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.interfere.error.message")+ "\n" + wrapIntoInlineMarkdown("vacation.comment.length.exceeded.message"), response.getErrorDescription());
+        Assert.assertEquals(wrapIntoInlineMarkdown("vacation.period.interfere.error.message") + "\n" + wrapIntoInlineMarkdown("vacation.comment.length.exceeded.message"), response.getErrorDescription());
     }
 }
