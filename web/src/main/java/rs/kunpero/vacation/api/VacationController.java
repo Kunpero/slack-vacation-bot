@@ -1,7 +1,6 @@
 package rs.kunpero.vacation.api;
 
 import com.google.gson.Gson;
-import com.slack.api.Slack;
 import com.slack.api.app_backend.dialogs.payload.PayloadTypeDetector;
 import com.slack.api.app_backend.interactive_components.ActionResponseSender;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
@@ -19,8 +18,8 @@ import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState;
 import com.slack.api.webhook.WebhookResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -74,6 +73,7 @@ import static rs.kunpero.vacation.util.ViewHelperUtils.buildVacationInfoView;
 @RestController
 @Slf4j
 @RequestMapping("/vacation")
+@RequiredArgsConstructor
 public class VacationController {
     private static final PayloadTypeDetector TYPE_DETECTOR = new PayloadTypeDetector();
     private static final SlashCommandPayloadParser SLASH_COMMAND_PAYLOAD_PARSER = new SlashCommandPayloadParser();
@@ -86,18 +86,9 @@ public class VacationController {
     private final Gson gson;
     private final MethodsClient methodsClient;
     private final ActionResponseSender actionResponseSender;
-    private final String accessToken;
 
-    @Autowired
-    public VacationController(VacationService vacationService, VacationAdminService vacationAdminService,
-                              Gson gson, Slack slack, ActionResponseSender actionResponseSender, @Value("${slack.access.token}") String accessToken) {
-        this.vacationService = vacationService;
-        this.vacationAdminService = vacationAdminService;
-        this.gson = gson;
-        this.methodsClient = slack.methods(accessToken);
-        this.actionResponseSender = actionResponseSender;
-        this.accessToken = accessToken;
-    }
+    @Value("${slack.access.token}")
+    private final String accessToken;
 
     @RequestMapping(value = "/start", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
     public SlashCommandResponse start(HttpServletRequest request) throws IOException {

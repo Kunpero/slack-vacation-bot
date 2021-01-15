@@ -65,7 +65,7 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-        public int read() throws IOException {
+        public int read() {
             return input.read();
         }
     }
