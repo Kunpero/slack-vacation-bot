@@ -53,7 +53,6 @@ public class VacationService {
     private final Clock clock;
     private final DateTimeFormatter dateTimeFormatter;
 
-    @Autowired
     public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper, Clock clock,
                            UserStatusService userStatusService, Slack slack, @Value("${slack.access.token}") String accessToken,
                            @Value("${date.pattern}") String datePattern) {
