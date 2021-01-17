@@ -22,6 +22,7 @@ import rs.kunpero.vacation.util.MessageSourceHelper;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,16 +51,18 @@ public class VacationService {
     private final MethodsClient methodsClient;
     private final String accessToken;
     private final Clock clock;
+    private final DateTimeFormatter dateTimeFormatter;
 
-    @Autowired
     public VacationService(VacationInfoRepository vacationInfoRepository, MessageSourceHelper messageSourceHelper, Clock clock,
-                           UserStatusService userStatusService, Slack slack, @Value("${slack.access.token}") String accessToken) {
+                           UserStatusService userStatusService, Slack slack, @Value("${slack.access.token}") String accessToken,
+                           @Value("${date.pattern}") String datePattern) {
         this.vacationInfoRepository = vacationInfoRepository;
         this.userStatusService = userStatusService;
         this.clock = clock;
         this.messageSourceHelper = messageSourceHelper;
         this.methodsClient = slack.methods(accessToken);
         this.accessToken = accessToken;
+        this.dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
     }
 
     @Value("${channel.notification.enabled}")
@@ -193,7 +196,7 @@ public class VacationService {
         return vacationInfoList.stream()
                 .sorted(Comparator.comparing(VacationInfo::getDateFrom))
                 .map(v -> new VacationInfoDto()
-                        .setVacationInfo(String.format("<@%s> `%s` - `%s` %s %s", v.getUserId(), v.getDateFrom(), v.getDateTo(),
+                        .setVacationInfo(String.format("<@%s> `%s` - `%s` %s %s", v.getUserId(), dateTimeFormatter.format(v.getDateFrom()), dateTimeFormatter.format(v.getDateTo()),
                                 formSubstitutionUserList(v.getSubstitutionUserIds()), v.getComment() != null ? "\n" + v.getComment() : ""))
                         .setVacationId(v.getId()))
                 .collect(toList());
@@ -203,7 +206,7 @@ public class VacationService {
         return vacationInfoList.stream()
                 .sorted(Comparator.comparing(VacationInfo::getDateFrom))
                 .map(v -> new VacationInfoDto()
-                        .setVacationInfo(String.format("`%s` - `%s` %s %s", v.getDateFrom(), v.getDateTo(),
+                        .setVacationInfo(String.format("`%s` - `%s` %s %s", dateTimeFormatter.format(v.getDateFrom()), dateTimeFormatter.format(v.getDateTo()),
                                 formSubstitutionUserList(v.getSubstitutionUserIds()), v.getComment() != null ? "\n" + v.getComment() : ""))
                         .setVacationId(v.getId()))
                 .collect(toList());

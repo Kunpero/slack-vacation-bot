@@ -35,6 +35,7 @@ notified.channel.id={selected channel id}
    ``` 
    slack.signing.secret=[Signing Secret]
    slack.access.token=*[Auth Access Token]
+   date.pattern=[Desired pattern of date]
    ```
 6) Install app to your slack workspace
 7) Run schema.sql for your database. In project you can find scripts for Oracle and Postgres.
