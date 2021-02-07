@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import rs.kunpero.vacation.config.TestConfig;
+import rs.kunpero.config.TestConfig;
 import rs.kunpero.vacation.entity.VacationInfo;
 import rs.kunpero.vacation.repository.VacationInfoRepository;
 import rs.kunpero.vacation.service.dto.AddVacationInfoRequestDto;
@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static rs.kunpero.vacation.config.TestConfig.NOW;
+import static rs.kunpero.config.TestConfig.NOW;
 import static rs.kunpero.vacation.service.VacationService.COMMENT_MAX_LENGTH;
 import static rs.kunpero.vacation.util.VacationUtils.wrapIntoInlineMarkdown;
 

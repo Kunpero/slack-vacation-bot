@@ -1,4 +1,4 @@
-package rs.kunpero.vacation.config;
+package rs.kunpero.config;
 
 import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -7,7 +7,7 @@ import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import rs.kunpero.vacation.config.filter.SlackRequestVerifierFilter;
+import rs.kunpero.config.filter.SlackRequestVerifierFilter;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {

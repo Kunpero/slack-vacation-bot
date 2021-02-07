@@ -1,4 +1,4 @@
-package rs.kunpero.vacation.config;
+package rs.kunpero.config;
 
 import com.google.gson.Gson;
 import com.slack.api.Slack;

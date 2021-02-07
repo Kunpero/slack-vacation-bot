@@ -1,4 +1,4 @@
-package rs.kunpero.vacation.config.filter;
+package rs.kunpero.config.filter;
 
 import org.apache.commons.io.IOUtils;
 

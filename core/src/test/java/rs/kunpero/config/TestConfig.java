@@ -1,4 +1,4 @@
-package rs.kunpero.vacation.config;
+package rs.kunpero.config;
 
 import com.slack.api.Slack;
 import com.slack.api.methods.AsyncMethodsClient;

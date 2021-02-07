@@ -1,4 +1,4 @@
-package rs.kunpero.vacation;
+package rs.kunpero;
 
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
