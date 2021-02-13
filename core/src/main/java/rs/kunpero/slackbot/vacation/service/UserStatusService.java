@@ -7,7 +7,6 @@ import com.slack.api.methods.response.users.profile.UsersProfileSetResponse;
 import com.slack.api.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.kunpero.slackbot.vacation.entity.VacationInfo;
 import rs.kunpero.slackbot.vacation.repository.VacationInfoRepository;
@@ -21,14 +20,11 @@ public class UserStatusService {
     private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
     private final MethodsClient methodsClient;
-    private final String accessToken;
     private final VacationInfoRepository vacationInfoRepository;
 
     @Autowired
-    public UserStatusService(MethodsClient methodsClient, VacationInfoRepository vacationInfoRepository,
-                             @Value("${slack.access.token}") String accessToken) {
+    public UserStatusService(MethodsClient methodsClient, VacationInfoRepository vacationInfoRepository) {
         this.methodsClient = methodsClient;
-        this.accessToken = accessToken;
         this.vacationInfoRepository = vacationInfoRepository;
     }
 
@@ -38,7 +34,6 @@ public class UserStatusService {
         profile.setStatusText(String.format("On vacation until %s", info.getDateTo().toString()));
         profile.setStatusExpiration(info.getDateTo().plusDays(1).atStartOfDay(DEFAULT_ZONE_ID).toEpochSecond());
         UsersProfileSetRequest request = UsersProfileSetRequest.builder()
-                .token(accessToken)
                 .user(info.getUserId())
                 .profile(profile)
                 .build();

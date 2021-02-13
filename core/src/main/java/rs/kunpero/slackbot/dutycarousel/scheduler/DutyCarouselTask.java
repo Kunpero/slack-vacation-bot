@@ -37,20 +37,17 @@ public class DutyCarouselTask {
     private final OkHttpClient okHttpClient;
     private final MethodsClient methodsClient;
 
-    private final String accessToken;
     private final String channelId;
 
 
     @Autowired
     public DutyCarouselTask(DutyListRepository dutyListRepository, VacationInfoRepository vacationInfoRepository,
-                            Clock clock, OkHttpClient okHttpClient, MethodsClient methodsClient,
-                            @Value("${slack.access.token}") String accessToken, @Value("${duty.notified.channel.id}") String channelId) {
+                            Clock clock, OkHttpClient okHttpClient, MethodsClient methodsClient, @Value("${duty.notified.channel.id}") String channelId) {
         this.dutyListRepository = dutyListRepository;
         this.vacationInfoRepository = vacationInfoRepository;
         this.clock = clock;
         this.okHttpClient = okHttpClient;
         this.methodsClient = methodsClient;
-        this.accessToken = accessToken;
         this.channelId = channelId;
     }
 
@@ -116,7 +113,7 @@ public class DutyCarouselTask {
 
     private void notifyChannel(String userId) throws IOException, SlackApiException {
         ChatPostMessageResponse response = methodsClient
-                .chatPostMessage(buildDutyNotifyPostRequest(accessToken, channelId, userId));
+                .chatPostMessage(buildDutyNotifyPostRequest(channelId, userId));
         log.debug(response.toString());
     }
 

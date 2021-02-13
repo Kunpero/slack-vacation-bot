@@ -31,11 +31,6 @@ public class SlackConfig {
     }
 
     @Bean
-    public AsyncMethodsClient asyncMethodsClient(Slack slack) {
-        return slack.methodsAsync(accessToken);
-    }
-
-    @Bean
     public MethodsClient methodsClient() {
         return slack().methods(accessToken);
     }

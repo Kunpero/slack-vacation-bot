@@ -20,7 +20,6 @@ import com.slack.api.model.view.ViewState;
 import com.slack.api.webhook.WebhookResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,18 +85,15 @@ public class VacationController {
     private final MethodsClient methodsClient;
     private final ActionResponseSender actionResponseSender;
 
-    private final String accessToken;
 
     @Autowired
     public VacationController(VacationService vacationService, VacationAdminService vacationAdminService, Gson gson,
-                              MethodsClient methodsClient, ActionResponseSender actionResponseSender,
-                              @Value("${slack.access.token}") String accessToken) {
+                              MethodsClient methodsClient, ActionResponseSender actionResponseSender) {
         this.vacationService = vacationService;
         this.vacationAdminService = vacationAdminService;
         this.gson = gson;
         this.methodsClient = methodsClient;
         this.actionResponseSender = actionResponseSender;
-        this.accessToken = accessToken;
     }
 
     @RequestMapping(value = "/start", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
@@ -214,7 +210,7 @@ public class VacationController {
 
         if (responseDto.isSuccessful()) {
             methodsClient
-                    .chatPostEphemeral(buildChatPostEphemeralRequest(payload.getUser().getId(), accessToken, payload.getView().getCallbackId()));
+                    .chatPostEphemeral(buildChatPostEphemeralRequest(payload.getUser().getId(), payload.getView().getCallbackId()));
             return;
         }
         buildErrorResponse(payload, responseDto.getErrorDescription(), response);

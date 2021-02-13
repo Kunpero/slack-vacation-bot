@@ -262,10 +262,9 @@ public class ViewHelperUtils {
         return blocks;
     }
 
-    public static ChatPostEphemeralRequest buildChatPostEphemeralRequest(String userId, String accessToken, String callbackId) {
+    public static ChatPostEphemeralRequest buildChatPostEphemeralRequest(String userId, String callbackId) {
         return ChatPostEphemeralRequest.builder()
                 .user(userId)
-                .token(accessToken)
                 .text("Success")
                 .channel(callbackId)
                 .blocks(List.of(SectionBlock.builder()
@@ -280,18 +279,16 @@ public class ViewHelperUtils {
                 .build();
     }
 
-    public static ChatPostMessageRequest buildChatPostRequest(String accessToken, String channelId,
+    public static ChatPostMessageRequest buildChatPostRequest(String channelId,
                                                               List<VacationInfoDto> vacationInfoList) {
         return ChatPostMessageRequest.builder()
-                .token(accessToken)
                 .channel(channelId)
                 .blocks(buildChannelShowVacationBlocks(vacationInfoList))
                 .build();
     }
 
-    public static ChatPostMessageRequest buildDutyNotifyPostRequest(String accessToken, String channelId, String userId) {
+    public static ChatPostMessageRequest buildDutyNotifyPostRequest(String channelId, String userId) {
         return ChatPostMessageRequest.builder()
-                .token(accessToken)
                 .channel(channelId)
                 .blocks(List.of(SectionBlock.builder()
                         .text(MarkdownTextObject.builder()
