@@ -1,5 +1,6 @@
 package rs.kunpero.dutycarousel.scheduler;
 
+import com.slack.api.methods.SlackApiException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import rs.kunpero.dutycarousel.entity.DutyList;
 import rs.kunpero.dutycarousel.entity.DutyUser;
 import rs.kunpero.dutycarousel.repository.DutyListRepository;
 
+import java.io.IOException;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -23,7 +25,7 @@ public class DutyCarouselTaskTest {
     private DutyListRepository dutyListRepository;
 
     @Test
-    public void selectNewDutyUserTest() {
+    public void selectNewDutyUserTest() throws IOException, SlackApiException {
         long listId = 0;
         DutyList list = dutyListRepository.findById(listId).orElseThrow();
         dutyCarouselTask.processDutyList(list);
@@ -36,7 +38,7 @@ public class DutyCarouselTaskTest {
     }
 
     @Test
-    public void selectNewDutyUserCircularIterationTest() {
+    public void selectNewDutyUserCircularIterationTest() throws IOException, SlackApiException {
         long listId = 1;
         DutyList list = dutyListRepository.findById(listId).orElseThrow();
         dutyCarouselTask.processDutyList(list);
@@ -49,7 +51,7 @@ public class DutyCarouselTaskTest {
     }
 
     @Test
-    public void selectNewDutyUserSkipWithVacation() {
+    public void selectNewDutyUserSkipWithVacation() throws IOException, SlackApiException {
         long listId = 2;
         DutyList list = dutyListRepository.findById(listId).orElseThrow();
         dutyCarouselTask.processDutyList(list);
@@ -62,7 +64,7 @@ public class DutyCarouselTaskTest {
     }
 
     @Test
-    public void allOtherUsersOnVacationTest() {
+    public void allOtherUsersOnVacationTest() throws IOException, SlackApiException {
         long listId = 3;
         DutyList list = dutyListRepository.findById(listId).orElseThrow();
         dutyCarouselTask.processDutyList(list);
@@ -72,5 +74,19 @@ public class DutyCarouselTaskTest {
         Assert.assertFalse(users.get(0).isOnDuty());
         Assert.assertTrue(users.get(1).isOnDuty());
         Assert.assertFalse(users.get(2).isOnDuty());
+    }
+
+    @Test
+    public void nextDutyTest() throws IOException, SlackApiException {
+        /**
+         * full job test
+         */
+    }
+
+    @Test
+    public void nextDutyDayOffTest() {
+        /**
+         * current day is day off
+         */
     }
 }
