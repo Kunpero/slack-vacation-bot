@@ -1,7 +1,7 @@
-package rs.kunpero.slackbot.vacation.config;
+package rs.kunpero.slackbot.config;
 
 import com.slack.api.Slack;
-import com.slack.api.methods.AsyncMethodsClient;
+import com.slack.api.methods.MethodsClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -28,8 +28,8 @@ public class TestConfig {
     }
 
     @Bean
-    public AsyncMethodsClient asyncMethodsClient(Slack slack) {
-        return slack.methodsAsync();
+    public MethodsClient methodsClient(Slack slack) {
+        return slack.methods();
     }
 
     @Bean

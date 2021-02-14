@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import rs.kunpero.slackbot.vacation.config.TestConfig;
+import rs.kunpero.slackbot.config.TestConfig;
 import rs.kunpero.slackbot.vacation.entity.VacationInfo;
 import rs.kunpero.slackbot.vacation.repository.VacationInfoRepository;
 import rs.kunpero.slackbot.vacation.service.UserStatusService;

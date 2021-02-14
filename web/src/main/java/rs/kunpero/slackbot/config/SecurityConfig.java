@@ -15,7 +15,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .mvcMatchers("/vacation/**")
+                .mvcMatchers("/vacation/**", "/duty/**", "/interactivity/**")
                 .permitAll()
                 .and()
                 .requiresChannel()
@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public FilterRegistrationBean slackRequestVerifierFilterRegistration(SlackRequestVerifierFilter filter) {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(filter);
-        registration.addUrlPatterns("/vacation/*");
+        registration.addUrlPatterns("/vacation/*", "/duty/*", "/interactivity/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
     }

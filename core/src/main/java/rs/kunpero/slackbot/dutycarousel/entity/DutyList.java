@@ -31,7 +31,13 @@ public class DutyList {
     @Column(name = "TEAM_ID", length = 21, nullable = false)
     private String teamId;
 
-    @Column(name = "MNEMONIC_NAME", length = 100)
+    @Column(name = "USER_GROUP_ID", length = 100, nullable = false)
+    private String userGroupId;
+
+    @Column(name = "CHANNEL_ID", length = 100, nullable = false)
+    private String channelId;
+
+    @Column(name = "MNEMONIC_NAME", length = 100, nullable = false)
     private String mnemonicName;
 
     @OneToMany(mappedBy = "dutyList", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

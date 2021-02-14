@@ -5,7 +5,7 @@ import com.slack.api.Slack;
 import com.slack.api.app_backend.SlackSignature;
 import com.slack.api.app_backend.events.servlet.SlackSignatureVerifier;
 import com.slack.api.app_backend.interactive_components.ActionResponseSender;
-import com.slack.api.methods.AsyncMethodsClient;
+import com.slack.api.app_backend.slash_commands.SlashCommandPayloadParser;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.util.json.GsonFactory;
 import okhttp3.OkHttpClient;
@@ -18,6 +18,7 @@ import java.time.Clock;
 
 @Configuration
 public class SlackConfig {
+    public static final SlashCommandPayloadParser SLASH_COMMAND_PAYLOAD_PARSER = new SlashCommandPayloadParser();
 
     @Value("${slack.signing.secret}")
     private String signingSecret;

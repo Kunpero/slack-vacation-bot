@@ -6,4 +6,5 @@ import rs.kunpero.slackbot.dutycarousel.entity.DutyList;
 
 @Repository
 public interface DutyListRepository extends JpaRepository<DutyList, Long> {
+    DutyList findByChannelId(String channelId);
 }

@@ -3,12 +3,11 @@ package rs.kunpero.slackbot.dutycarousel.scheduler;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -28,6 +27,7 @@ import static rs.kunpero.slackbot.vacation.util.ViewHelperUtils.buildDutyNotifyP
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class DutyCarouselTask {
     public final static String IS_DAY_OFF_SERVICE_URL = "https://isdayoff.ru/%s";
 
@@ -36,20 +36,6 @@ public class DutyCarouselTask {
     private final Clock clock;
     private final OkHttpClient okHttpClient;
     private final MethodsClient methodsClient;
-
-    private final String channelId;
-
-
-    @Autowired
-    public DutyCarouselTask(DutyListRepository dutyListRepository, VacationInfoRepository vacationInfoRepository,
-                            Clock clock, OkHttpClient okHttpClient, MethodsClient methodsClient, @Value("${duty.notified.channel.id}") String channelId) {
-        this.dutyListRepository = dutyListRepository;
-        this.vacationInfoRepository = vacationInfoRepository;
-        this.clock = clock;
-        this.okHttpClient = okHttpClient;
-        this.methodsClient = methodsClient;
-        this.channelId = channelId;
-    }
 
     @Scheduled(cron = "${next.duty.cron}")
     public void nextDuty() throws IOException, SlackApiException {
@@ -80,7 +66,7 @@ public class DutyCarouselTask {
     void processDutyList(DutyList list) throws IOException, SlackApiException {
         DutyUser newDutyUser = findNewDutyUser(list);
         dutyListRepository.save(list);
-        notifyChannel(newDutyUser.getUserId());
+        notifyChannel(newDutyUser.getUserId(), list.getChannelId());
     }
 
     private DutyUser findNewDutyUser(DutyList list) {
@@ -111,7 +97,7 @@ public class DutyCarouselTask {
         throw new RuntimeException("Unexpected error");
     }
 
-    private void notifyChannel(String userId) throws IOException, SlackApiException {
+    private void notifyChannel(String userId, String channelId) throws IOException, SlackApiException {
         ChatPostMessageResponse response = methodsClient
                 .chatPostMessage(buildDutyNotifyPostRequest(channelId, userId));
         log.debug(response.toString());

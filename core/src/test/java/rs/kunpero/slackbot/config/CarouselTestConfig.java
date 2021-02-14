@@ -1,7 +1,5 @@
-package rs.kunpero.slackbot.vacation.config;
+package rs.kunpero.slackbot.config;
 
-import com.slack.api.Slack;
-import com.slack.api.methods.MethodsClient;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -45,10 +43,5 @@ public class CarouselTestConfig {
         when(call.execute()).thenReturn(response);
         when(client.newCall(any())).thenReturn(call);
         return client;
-    }
-
-    @Bean
-    public MethodsClient methodsClient(Slack slack) {
-        return slack.methods();
     }
 }
