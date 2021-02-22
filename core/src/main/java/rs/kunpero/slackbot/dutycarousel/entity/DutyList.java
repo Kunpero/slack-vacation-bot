@@ -40,6 +40,10 @@ public class DutyList {
     @Column(name = "MNEMONIC_NAME", length = 100, nullable = false)
     private String mnemonicName;
 
+    @Column(name = "LAST_MESSAGE_ID", length = 50)
+    private String lastMessageId;
+
+
     @OneToMany(mappedBy = "dutyList", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy("positionId ASC")
     private List<DutyUser> users;

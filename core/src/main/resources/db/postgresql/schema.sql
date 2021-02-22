@@ -15,3 +15,24 @@ USER_ID                 VARCHAR (21)        NOT NULL,
 TEAM_ID                 VARCHAR (21)        NOT NULL,
 CONSTRAINT VACATION_ADMIN_PK PRIMARY KEY (USER_ID)
 );
+-------------------------------------------------------------------------------
+CREATE TABLE DUTY_LIST (
+ID                      BIGINT              PRIMARY KEY,
+TEAM_ID                 VARCHAR (21)        NOT NULL,
+USER_GROUP_ID           VARCHAR (100)       UNIQUE NOT NULL,
+CHANNEL_ID              VARCHAR (50)        UNIQUE NOT NULL,
+MNEMONIC_NAME           VARCHAR (100)       NOT NULL,
+LAST_MESSAGE_ID         VARCHAR (50),
+);
+CREATE SEQUENCE IF NOT EXISTS SEQ_DUTY_LIST START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE DUTY_USER (
+ID                      BIGINT              PRIMARY KEY,
+POSITION_ID             INTEGER,
+USER_ID                 VARCHAR (21)        NOT NULL,
+ON_DUTY                 BOOLEAN             NOT NULL DEFAULT FALSE,
+LAST_DATE_ON_DUTY       DATE,
+DUTY_LIST_ID            BIGINT              NOT NULL
+);
+ALTER TABLE DUTY_USER  ADD CONSTRAINT DUTY_LIST_FK
+FOREIGN KEY (DUTY_LIST_ID) REFERENCES DUTY_LIST (ID);

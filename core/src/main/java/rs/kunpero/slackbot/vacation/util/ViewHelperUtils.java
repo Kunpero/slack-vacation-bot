@@ -321,8 +321,6 @@ public class ViewHelperUtils {
                 .build();
     }
 
-
-
     private static List<LayoutBlock> buildChannelShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
         List<LayoutBlock> blocks = new ArrayList<>();
         if (vacationInfoList.isEmpty()) {

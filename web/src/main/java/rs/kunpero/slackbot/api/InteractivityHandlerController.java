@@ -149,7 +149,7 @@ public class InteractivityHandlerController {
                     .build();
 
         } else if (actionId == SET_DUTY) {
-            SetPersonOnDutyResponse responseDto = dutyService.setPersonOnDuty(payload.getChannel().getId(), null);
+            SetPersonOnDutyResponse responseDto = dutyService.setPersonOnDuty(payload.getChannel().getId(), payload.getActions().get(0).getSelectedUser());
             actionResponse = ActionResponse.builder()
                     .deleteOriginal(true)
                     .responseType("ephemeral")

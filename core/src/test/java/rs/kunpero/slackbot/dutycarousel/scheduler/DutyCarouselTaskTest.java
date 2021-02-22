@@ -4,14 +4,17 @@ import com.slack.api.methods.SlackApiException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import rs.kunpero.slackbot.config.CarouselTestConfig;
 import rs.kunpero.slackbot.config.TestConfig;
 import rs.kunpero.slackbot.dutycarousel.entity.DutyList;
 import rs.kunpero.slackbot.dutycarousel.entity.DutyUser;
 import rs.kunpero.slackbot.dutycarousel.repository.DutyListRepository;
+import rs.kunpero.slackbot.dutycarousel.service.DutyService;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +26,8 @@ public class DutyCarouselTaskTest {
     private DutyCarouselTask dutyCarouselTask;
     @Autowired
     private DutyListRepository dutyListRepository;
+    @MockBean
+    private DutyService dutyService;
 
     @Test
     public void selectNewDutyUserTest() throws IOException, SlackApiException {

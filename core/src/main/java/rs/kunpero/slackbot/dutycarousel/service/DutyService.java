@@ -2,6 +2,8 @@ package rs.kunpero.slackbot.dutycarousel.service;
 
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.request.pins.PinsAddRequest;
+import com.slack.api.methods.request.pins.PinsRemoveRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,15 +43,29 @@ public class DutyService {
                         u.setOnDuty(false);
                     }
                 });
+
+        String messageId = notifyChannel(userId, dutyList.getChannelId(), dutyList.getLastMessageId());
+        dutyList.setLastMessageId(messageId);
         dutyListRepository.save(dutyList);
-        notifyChannel(userId, channelId);
-        return buildSetDutyResponse("set.duty.user.success.message");
+        return buildSetDutyResponse("set.duty.user.success");
     }
 
-    private void notifyChannel(String userId, String channelId) throws IOException, SlackApiException {
+    public String notifyChannel(String userId, String channelId, String lastMessageId) throws IOException, SlackApiException {
+        if (lastMessageId != null) {
+            methodsClient.pinsRemove(PinsRemoveRequest.builder()
+                    .channel(channelId)
+                    .timestamp(lastMessageId)
+                    .build());
+        }
         ChatPostMessageResponse response = methodsClient
                 .chatPostMessage(buildDutyNotifyPostRequest(channelId, userId));
         log.debug(response.toString());
+        String messageId = response.getTs();
+        methodsClient.pinsAdd(PinsAddRequest.builder()
+                .channel(channelId)
+                .timestamp(messageId)
+                .build());
+        return messageId;
     }
 
     private SetPersonOnDutyResponse buildSetDutyResponse(String source) {
