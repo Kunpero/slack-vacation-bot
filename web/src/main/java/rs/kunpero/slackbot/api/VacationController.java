@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static rs.kunpero.slackbot.config.SlackConfig.SLASH_COMMAND_PAYLOAD_PARSER;
-import static rs.kunpero.slackbot.vacation.util.ViewHelperUtils.START_MENU;
+import static rs.kunpero.slackbot.vacation.util.ViewHelperUtils.VACATION_START_VIEW;
 import static rs.kunpero.slackbot.vacation.util.ViewHelperUtils.buildVacationInfoView;
 
 @RestController
@@ -47,6 +47,6 @@ public class VacationController {
             return buildVacationInfoView(responseDto.getVacationInfoList(), "Upcoming vacations:");
         }
 
-        return START_MENU;
+        return VACATION_START_VIEW;
     }
 }

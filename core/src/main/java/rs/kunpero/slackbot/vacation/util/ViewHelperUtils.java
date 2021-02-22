@@ -30,6 +30,7 @@ import static rs.kunpero.slackbot.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.slackbot.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.slackbot.vacation.util.ActionId.DELETE_VACATION;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_COMMENT;
+import static rs.kunpero.slackbot.vacation.util.ActionId.SET_DUTY;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_TO;
@@ -67,7 +68,29 @@ public class ViewHelperUtils {
                     .build()
     );
 
-    public static final SlashCommandResponse START_MENU = SlashCommandResponse.builder()
+    public static final SlashCommandResponse DUTY_START_VIEW = SlashCommandResponse.builder().responseType("ephemeral")
+            .blocks(List.of(
+                    SectionBlock.builder()
+                            .text(MarkdownTextObject.builder()
+                                    .text(":bust_in_silhouette: Choose current person on duty:")
+                                    .build()).build(),
+                    DividerBlock.builder().build(),
+                    ActionsBlock.builder()
+                            .blockId(ADD_VACATION.name())
+                            .elements(List.of(UsersSelectElement.builder()
+                                    .actionId(SET_DUTY.name())
+                                    .placeholder(PlainTextObject.builder()
+                                            .text("Select user")
+                                            .build()).build())).build())).build();
+
+    public static final SlashCommandResponse DUTY_START_ERROR_VIEW = SlashCommandResponse.builder().responseType("ephemeral")
+            .blocks(List.of(
+                    SectionBlock.builder()
+                            .text(MarkdownTextObject.builder()
+                                    .text(":no_entry: Use duty command in the team's channel")
+                                    .build()).build())).build();
+
+    public static final SlashCommandResponse VACATION_START_VIEW = SlashCommandResponse.builder()
             .responseType("ephemeral")
             .blocks(List.of(
                     SectionBlock.builder()
@@ -297,6 +320,7 @@ public class ViewHelperUtils {
                         .build()))
                 .build();
     }
+
 
 
     private static List<LayoutBlock> buildChannelShowVacationBlocks(List<VacationInfoDto> vacationInfoList) {
