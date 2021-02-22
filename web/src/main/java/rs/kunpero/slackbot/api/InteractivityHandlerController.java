@@ -21,6 +21,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import rs.kunpero.slackbot.dutycarousel.service.DutyService;
+import rs.kunpero.slackbot.dutycarousel.service.dto.SetPersonOnDutyResponse;
 import rs.kunpero.slackbot.vacation.service.VacationAdminService;
 import rs.kunpero.slackbot.vacation.service.VacationService;
 import rs.kunpero.slackbot.vacation.service.dto.AddVacationInfoRequestDto;
@@ -47,6 +49,7 @@ import static rs.kunpero.slackbot.vacation.util.ActionId.ADD_VACATION;
 import static rs.kunpero.slackbot.vacation.util.ActionId.CLOSE_DIALOG;
 import static rs.kunpero.slackbot.vacation.util.ActionId.DELETE_VACATION;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_COMMENT;
+import static rs.kunpero.slackbot.vacation.util.ActionId.SET_DUTY;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_FROM;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_SUBSTITUTION;
 import static rs.kunpero.slackbot.vacation.util.ActionId.SET_TO;
@@ -77,6 +80,7 @@ public class InteractivityHandlerController {
     private final MethodsClient methodsClient;
     private final ActionResponseSender actionResponseSender;
     private final VacationService vacationService;
+    private final DutyService dutyService;
 
 
     @RequestMapping(value = "/handle", method = RequestMethod.POST, consumes = APPLICATION_FORM_URLENCODED_VALUE)
@@ -144,6 +148,13 @@ public class InteractivityHandlerController {
                     .responseType("ephemeral")
                     .build();
 
+        } else if (actionId == SET_DUTY) {
+            SetPersonOnDutyResponse responseDto = dutyService.setPersonOnDuty(payload.getChannel().getId(), null);
+            actionResponse = ActionResponse.builder()
+                    .deleteOriginal(true)
+                    .responseType("ephemeral")
+                    .text(responseDto.getErrorDescription())
+                    .build();
         }
 
         WebhookResponse response = actionResponseSender.send(payload.getResponseUrl(), actionResponse);

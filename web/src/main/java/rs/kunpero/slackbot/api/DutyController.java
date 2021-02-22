@@ -43,35 +43,30 @@ public class DutyController {
         body = URLDecoder.decode(body, StandardCharsets.UTF_8);
 
         SlashCommandPayload payload = SLASH_COMMAND_PAYLOAD_PARSER.parse(body);
-        DutyList dutyList = dutyService.findDutyList(payload);
+        String channelId = payload.getChannelId();
+        DutyList dutyList = dutyService.findDutyList(channelId);
         if (dutyList != null) {
             return SlashCommandResponse.builder().responseType("ephemeral")
                     .blocks(List.of(
                             SectionBlock.builder()
                                     .text(MarkdownTextObject.builder()
                                             .text(":bust_in_silhouette: Choose current person on duty:")
-                                            .build())
-                                    .build(),
+                                            .build()).build(),
                             DividerBlock.builder().build(),
                             ActionsBlock.builder()
                                     .blockId(ADD_VACATION.name())
-                                    .elements(List.of(UsersSelectElement.builder()//list of users from table
+                                    .elements(List.of(UsersSelectElement.builder()
                                             .actionId(SET_DUTY.name())
-//                                            .initialUser(userId)
                                             .placeholder(PlainTextObject.builder()
                                                     .text("Select user")
-                                                    .build())
-                                            .build()))
-                                    .build())).build();
+                                                    .build()).build())).build())).build();
         } else {
             return SlashCommandResponse.builder().responseType("ephemeral")
                     .blocks(List.of(
                             SectionBlock.builder()
                                     .text(MarkdownTextObject.builder()
                                             .text(":no_entry: Use duty command in the team's channel")
-                                            .build())
-                                    .build()))
-                    .build();
+                                            .build()).build())).build();
         }
     }
 }

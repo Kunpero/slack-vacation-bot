@@ -20,4 +20,9 @@ public class DutyListRepositoryTest {
         Assert.assertNotNull(list);
         Assert.assertEquals(3, list.getUsers().size());
     }
+
+    @Test
+    public void existsByChannelIdAndUserIdTest() {
+        Assert.assertTrue(dutyListRepository.existsByChannelIdAndUserId("CHANNEL0", "USER1"));
+    }
 }
