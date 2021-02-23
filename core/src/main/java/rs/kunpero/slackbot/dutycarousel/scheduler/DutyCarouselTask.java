@@ -20,8 +20,10 @@ import rs.kunpero.slackbot.vacation.repository.VacationInfoRepository;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -71,7 +73,8 @@ public class DutyCarouselTask {
     private DutyUser findNewDutyUser(DutyList list) {
         int maxIterationsValue = list.getUsers().size();
         List<VacationInfo> currentVacations = vacationInfoRepository.findByTeamIdAndDateBetween(list.getTeamId(), LocalDate.now(clock));
-        for (Iterator<DutyUser> userIterator = circularIterator(list.getUsers(), list.getUsers().size()); userIterator.hasNext(); ) {
+        for (Iterator<DutyUser> userIterator = circularIterator(list.getUsers().stream()
+                .sorted(Comparator.comparingInt(DutyUser::getPositionId)).collect(Collectors.toList()), list.getUsers().size()); userIterator.hasNext(); ) {
             DutyUser currentDutyUser = userIterator.next();
             if (!currentDutyUser.isOnDuty()) {
                 continue;
