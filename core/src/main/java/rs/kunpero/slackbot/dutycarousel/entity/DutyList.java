@@ -31,9 +31,6 @@ public class DutyList {
     @Column(name = "TEAM_ID", length = 21, nullable = false)
     private String teamId;
 
-    @Column(name = "USER_GROUP_ID", length = 100, nullable = false)
-    private String userGroupId;
-
     @Column(name = "CHANNEL_ID", length = 100, nullable = false)
     private String channelId;
 
